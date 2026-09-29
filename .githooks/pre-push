@@ -1,0 +1,3 @@
+#!/bin/sh
+# Last line of defence before anything leaves this machine.
+node scripts/check-secrets.mjs || exit 1

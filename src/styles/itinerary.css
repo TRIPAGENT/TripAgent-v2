@@ -1,0 +1,433 @@
+/* =============================================================================
+   TripAgent itinerary — the app's own rendering of a plan, in Nocturne.
+
+   NOTE: this file used to be copied verbatim from the backend
+   (Chatbot_v1/tripagent/src/trip/itinerary.css) by `npm run catalogue`, and the
+   backend still styles its shared plan page with that copy. This is now the
+   APP's stylesheet only: it is written against the Nocturne tokens in
+   nocturne.css and the two renderings have deliberately parted company. The
+   catalogue script would overwrite it — see the note in the build report.
+
+   Only the itinerary's own objects live here (the boarding pass, the stay and
+   index cards, the day timeline, the cost table, the segmented view control).
+   Everything else is a nocturne.css class or a Tailwind utility at the call
+   site, as the kit asks.
+   ===========================================================================*/
+
+/* ---------------------------------------------------------- the document -- */
+
+.it-doc {
+  color: var(--ivory);
+  font-family: var(--f-sans);
+}
+
+/* ------------------------------------------------- segmented view control -- */
+
+.it-views {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 48px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+}
+/* The active view is carried by a pill that slides, not by a fill that blinks. */
+.it-views-pill {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: 40px;
+  width: calc((100% - 8px) / 3);
+  border-radius: var(--r-pill);
+  background: var(--ink-4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.28s var(--ease-out);
+  pointer-events: none;
+}
+.it-view {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  font-family: var(--f-sans);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ivory-2);
+  transition: color 0.2s var(--ease-out);
+}
+.it-view.is-on {
+  color: var(--ivory);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .it-views-pill {
+    transition: none;
+  }
+}
+
+/* The day sub-tab rail, with a chevron at each end. */
+.it-subrail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.it-subrail-track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.it-subrail-track::-webkit-scrollbar {
+  display: none;
+}
+.it-subrail-chev {
+  flex: none;
+  width: 32px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ivory-3);
+}
+
+/* ----------------------------------------------------------- definitions -- */
+
+.it-defrow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.it-defrow:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.it-defvalue {
+  font-weight: 400;
+}
+
+/* The one line that says why the trip has this shape. */
+.it-thesis {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------------- the boarding pass */
+
+.it-pass {
+  position: relative;
+  border-radius: 22px;
+}
+
+/* The schedule row: departure time large, the legs over a hairline, arrival. */
+.it-flight-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+}
+.it-time {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 36px;
+  letter-spacing: -0.005em;
+  color: var(--ivory);
+  white-space: nowrap;
+}
+.it-flight-city {
+  font-family: var(--f-sans);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ivory-3);
+  margin-top: 3px;
+}
+.it-flight-row > :first-child,
+.it-flight-row > :last-child {
+  max-width: 40%;
+}
+.it-flight-mid {
+  text-align: center;
+  min-width: 0;
+}
+.it-flight-line {
+  height: 0;
+  border-top: 1px solid var(--line-2);
+  margin: 7px 0;
+}
+/* The footer strip: what the line is, and what it costs. */
+.it-flight-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+/* -------------------------------------------------- alternatives, in view -- */
+
+.it-alt {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.it-alt:first-child {
+  border-top: 0;
+}
+/* No hotel photography exists, so the alternative is indexed as type. */
+.it-alt-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--champagne-line);
+  background: var(--champagne-3);
+  color: var(--champagne);
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-size: 14px;
+  line-height: 1;
+}
+/* The perforation, with a notch bitten out of each edge. */
+.it-perf {
+  position: relative;
+  height: 0;
+  margin: 0 20px;
+  border-top: 1px dashed var(--line-2);
+}
+.it-perf::before,
+.it-perf::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink-0);
+  border: 1px solid var(--line-2);
+}
+.it-perf::before {
+  left: -29px;
+  clip-path: inset(0 0 0 8px);
+}
+.it-perf::after {
+  right: -29px;
+  clip-path: inset(0 8px 0 0);
+}
+
+/* --------------------------------------------------------- the index card -- */
+
+/* Where no honest photograph exists, the place is set as type. */
+.it-index-rule {
+  height: 1px;
+  background: var(--champagne-line);
+}
+
+/* ------------------------------------------------------------- the prices -- */
+
+/* The backend writes a price as a sentence when nothing is quoted ("Not checked
+   — target ≈₹50,000"). Those wrap in the text face instead of running off. */
+.it-price {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 21px;
+  line-height: 26px;
+  color: var(--ivory);
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+.it-price--long {
+  font-family: var(--f-sans);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--ivory-2);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.it-costrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-family: var(--f-sans);
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--ivory-2);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.it-costrow > :last-child {
+  text-align: right;
+  color: var(--ivory);
+}
+.it-costrow > dd {
+  margin: 0;
+}
+.it-costrow--total {
+  border-top: 1px solid var(--champagne-line);
+  padding-top: 16px;
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--ivory);
+}
+.it-costrow--total > :last-child {
+  color: var(--ivory);
+}
+
+/* ------------------------------------------------------- the day timeline -- */
+
+.it-step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  column-gap: 12px;
+  padding-bottom: 18px;
+}
+.it-step:last-child {
+  padding-bottom: 0;
+}
+.it-step-gutter {
+  position: relative;
+}
+.it-dot {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--ivory-3);
+  background: var(--ink-2);
+}
+/* A transfer: the champagne ring, and a dashed run to whatever follows. */
+.it-move {
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(var(--champagne-3), var(--champagne-3)), var(--ink-2);
+  border: 1px solid var(--champagne-line);
+  color: var(--champagne);
+}
+.it-thread {
+  position: absolute;
+  left: 11px;
+  top: 18px;
+  bottom: -18px;
+  border-left: 1px solid var(--line-2);
+}
+.it-thread--move {
+  top: 24px;
+  border-left: 1px dashed var(--champagne-line);
+}
+
+/* --------------------------------------------------------------- the gate -- */
+
+.it-gate {
+  border-radius: 22px;
+  background: rgba(230, 176, 113, 0.07);
+  border: 1px solid rgba(230, 176, 113, 0.28);
+}
+.it-gate-mark {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(230, 176, 113, 0.14);
+  color: var(--amber);
+}
+
+/* ------------------------------------------------------------ the numbers -- */
+
+/* "Reservations that matter" — the order is the point, so it is set in the display face. */
+.it-numeral {
+  font-family: var(--f-display);
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 26px;
+  color: var(--champagne);
+  font-variant-numeric: lining-nums;
+}
+
+/* ---------------------------------------------------------- what it costs -- */
+
+.it-total {
+  border-radius: 22px;
+  background:
+    radial-gradient(
+      130% 110% at 100% 0%,
+      rgba(216, 194, 154, 0.2) 0%,
+      rgba(216, 194, 154, 0.07) 38%,
+      rgba(216, 194, 154, 0) 72%
+    ),
+    var(--ink-2);
+  border: 1px solid var(--champagne-line);
+  box-shadow:
+    inset 0 1px 0 rgba(216, 194, 154, 0.22),
+    var(--shadow-card);
+}
+
+/* --------------------------------------------------------- the swap sheet -- */
+
+.it-option {
+  border-radius: 20px;
+}
+.it-option--on {
+  border: 1.5px solid var(--champagne);
+  background:
+    linear-gradient(180deg, var(--champagne-3) 0%, rgba(216, 194, 154, 0) 46%),
+    var(--ink-2);
+  box-shadow:
+    0 0 0 5px rgba(216, 194, 154, 0.06),
+    var(--shadow-card);
+}
+
+/* ------------------------------------------------------------------ misc -- */
+
+.it-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  color: var(--ivory-2);
+}

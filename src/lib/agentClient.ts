@@ -1,0 +1,454 @@
+import type { ChatMessage } from '@/lib/types'
+import { msg } from '@/lib/concierge'
+
+/**
+ * Client for the TripAgent backend (Chatbot_v1/tripagent).
+ *
+ * Locally everything goes through the app's own origin under /agent (see the
+ * proxy in vite.config.ts). Deployed, VITE_AGENT_URL points at the agent's own
+ * https address and the agent allows this app's origin. The backend owns the
+ * voice, the memory, the plan pages and the Desk; this module translates its
+ * wire shape into the app's model.
+ *
+ * Every member call carries the signed session issued at the door. The server
+ * reads who the member is from that, never from anything the app claims.
+ */
+
+export const BASE = ((import.meta.env.VITE_AGENT_URL as string | undefined) || '/agent').replace(/\/$/, '')
+
+/* ---------------------------------------------------------------- session --- */
+
+const SESSION_KEY = 'tripagent:session'
+
+interface Session {
+  token: string
+  expiresAt: string
+}
+
+function readSession(): Session | null {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null') as Session | null
+    return s && Date.parse(s.expiresAt) > Date.now() ? s : null
+  } catch {
+    return null
+  }
+}
+
+export const hasSession = () => readSession() !== null
+export const clearSession = () => {
+  try {
+    localStorage.removeItem(SESSION_KEY)
+  } catch {
+    /* private mode */
+  }
+}
+
+/** Fired when the server says the session is over, so the app returns to the door. */
+export const SIGNED_OUT_EVENT = 'tripagent:signed-out'
+
+function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const s = readSession()
+  return s ? { ...extra, Authorization: `Bearer ${s.token}` } : extra
+}
+
+function noteAuth(res: Response) {
+  if (res.status === 401 && readSession()) {
+    clearSession()
+    window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
+  }
+}
+
+export interface SessionMember {
+  code: string
+  name: string
+  tier: import('./types').MemberTier
+  phoneMasked?: string
+  directives?: string
+}
+
+/**
+ * The door. The code is checked by the server against the member registry; the
+ * app holds no list of members. Fails closed, including when the Desk is
+ * unreachable: nobody is let in on the strength of a client-side check.
+ */
+export async function signInWithCode(code: string): Promise<SessionMember> {
+  let res: Response
+  try {
+    res = await fetch(`${BASE}/api/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+      signal: AbortSignal.timeout(12_000),
+    })
+  } catch {
+    throw new AgentError('We cannot reach the Desk from this device. Check the connection and try again.')
+  }
+  const body = (await res.json().catch(() => ({}))) as { member?: SessionMember; token?: string; expiresAt?: string; error?: string }
+  if (!res.ok || !body.member || !body.token || !body.expiresAt) {
+    throw new AgentError(body.error ?? 'We could not open the door just now. Try again in a moment.', res.status !== 401)
+  }
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ token: body.token, expiresAt: body.expiresAt }))
+  return body.member
+}
+
+/** Is the stored session still good? `null` means the Desk could not be asked. */
+export async function checkSession(): Promise<SessionMember | false | null> {
+  if (!readSession()) return false
+  try {
+    const res = await fetch(`${BASE}/api/session`, { headers: authHeaders(), signal: AbortSignal.timeout(6_000) })
+    if (res.status === 401) {
+      clearSession()
+      return false
+    }
+    if (!res.ok) return null
+    return ((await res.json()) as { member: SessionMember }).member
+  } catch {
+    return null
+  }
+}
+
+export interface AgentHealth {
+  ok: boolean
+  modelReady: boolean
+  researchReady: boolean
+}
+
+/** A turn can legitimately take a long time: up to 6 tool steps behind one reply. */
+const TURN_TIMEOUT_MS = 190_000
+const HEALTH_TIMEOUT_MS = 4_000
+
+export async function agentHealth(): Promise<AgentHealth | null> {
+  try {
+    const res = await fetch(`${BASE}/health`, {
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+    })
+    if (!res.ok) return null
+    const body = (await res.json()) as Partial<AgentHealth>
+    return {
+      ok: Boolean(body.ok),
+      modelReady: Boolean(body.modelReady),
+      researchReady: Boolean(body.researchReady),
+    }
+  } catch {
+    return null
+  }
+}
+
+export class AgentError extends Error {
+  readonly retryable: boolean
+  constructor(message: string, retryable = true) {
+    super(message)
+    this.name = 'AgentError'
+    this.retryable = retryable
+  }
+}
+
+interface ChatResponse {
+  messages?: string[]
+  error?: string
+}
+
+export async function sendToAgent(message: string): Promise<ChatMessage[]> {
+  let res: Response
+  try {
+    res = await fetch(`${BASE}/api/chat`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message }),
+      signal: AbortSignal.timeout(TURN_TIMEOUT_MS),
+    })
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === 'TimeoutError'
+    throw new AgentError(
+      timedOut
+        ? 'Tara took too long to answer. Send that again when you are ready.'
+        : 'Tara is not reachable from this device right now.',
+    )
+  }
+
+  noteAuth(res)
+  let body: ChatResponse = {}
+  try {
+    body = (await res.json()) as ChatResponse
+  } catch {
+    /* fall through to the status handling below */
+  }
+
+  if (!res.ok) {
+    // 503 means no model key configured; retrying will not help until that is fixed.
+    throw new AgentError(body.error ?? 'Tara could not complete that turn.', res.status !== 503)
+  }
+
+  const parts = (body.messages ?? []).map((m) => m.trim()).filter(Boolean)
+  if (parts.length === 0) {
+    throw new AgentError('Tara returned an empty reply.')
+  }
+
+  return toChatMessages(parts)
+}
+
+export type StreamEvent =
+  | { type: 'text'; delta: string }
+  | { type: 'tool'; name: string }
+  | { type: 'done'; messages: string[]; cost?: number }
+  | { type: 'error'; message: string }
+
+/** What each tool is called while the traveller is waiting on it. */
+const TOOL_LABELS: Record<string, string> = {
+  build_trip_plan: 'Building your plan',
+  build_comparison: 'Comparing your options',
+  get_plan: 'Reading your plan',
+  web_search: 'Searching',
+  read_page: 'Reading a source',
+  search_memory: 'Checking what we know',
+  read_memory: 'Checking what we know',
+  memory_history: 'Checking what we know',
+  todo_add: 'Noting that down',
+  todo_list: 'Checking open loops',
+  todo_done: 'Closing that off',
+}
+
+export const labelForTool = (name: string) => TOOL_LABELS[name] ?? 'Working'
+
+/**
+ * Streams a turn. A plan build runs well over a minute, so the caller gets text
+ * deltas and tool names as they happen rather than a dead screen.
+ *
+ * The final `done` event carries the same `messages` array the non-streaming
+ * route returns, so both paths converge on one shape.
+ */
+export async function streamFromAgent(
+  message: string,
+  onEvent: (e: StreamEvent) => void,
+): Promise<ChatMessage[]> {
+  let res: Response
+  try {
+    res = await fetch(`${BASE}/api/chat/stream`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ message }),
+      signal: AbortSignal.timeout(TURN_TIMEOUT_MS),
+    })
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === 'TimeoutError'
+    throw new AgentError(
+      timedOut
+        ? 'Tara took too long to answer. Send that again when you are ready.'
+        : 'Tara is not reachable from this device right now.',
+    )
+  }
+
+  noteAuth(res)
+  if (!res.ok || !res.body) {
+    let error: string | undefined
+    try {
+      error = ((await res.json()) as ChatResponse).error
+    } catch {
+      /* no body */
+    }
+    throw new AgentError(error ?? 'Tara could not complete that turn.', res.status !== 503)
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let finalMessages: string[] | null = null
+  let failure: string | null = null
+
+  // SSE frames are separated by a blank line and can split across chunks, so the
+  // buffer is only drained up to the last complete frame.
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const frames = buffer.split('\n\n')
+    buffer = frames.pop() ?? ''
+    for (const frame of frames) {
+      const line = frame.split('\n').find((l) => l.startsWith('data:'))
+      if (!line) continue
+      let event: StreamEvent
+      try {
+        event = JSON.parse(line.slice(5).trim()) as StreamEvent
+      } catch {
+        continue
+      }
+      if (event.type === 'done') finalMessages = event.messages
+      else if (event.type === 'error') failure = event.message
+      onEvent(event)
+    }
+  }
+
+  if (failure) throw new AgentError(failure)
+  if (!finalMessages || finalMessages.length === 0) {
+    throw new AgentError('Tara returned an empty reply.')
+  }
+  return toChatMessages(finalMessages.map((m) => m.trim()).filter(Boolean))
+}
+
+const BARE_URL = /^https?:\/\/\S+$/
+
+/**
+ * A built plan arrives as three separate messages: a short introduction, the bare
+ * link on its own, and a relaxed invitation. The app renders that trio as one
+ * release card rather than three bubbles — the link is the artefact, not a line of
+ * text — and keeps any surrounding conversation as ordinary messages.
+ */
+export function toChatMessages(parts: string[]): ChatMessage[] {
+  const out: ChatMessage[] = []
+  const linkIndex = parts.findIndex((p) => BARE_URL.test(p))
+
+  if (linkIndex === -1) {
+    for (const p of parts) out.push(msg('ai', p))
+    return out
+  }
+
+  const intro = parts.slice(0, linkIndex).join('\n\n').trim()
+  const url = parts[linkIndex].trim()
+  const invitation = parts.slice(linkIndex + 1).join('\n\n').trim()
+
+  out.push(
+    msg('ai', intro || 'Your plan is ready.', {
+      release: {
+        version: planVersionFrom(url),
+        title: planTitleFrom(intro),
+      },
+      planUrl: url,
+    }),
+  )
+  if (invitation) out.push(msg('ai', invitation))
+  return out
+}
+
+/** The page key is opaque; show a short stable stub so revisions are distinguishable. */
+function planVersionFrom(url: string): string {
+  const key = url.split('/').filter(Boolean).at(-1) ?? ''
+  return key ? `Ref ${key.slice(0, 6).toUpperCase()}` : 'Plan'
+}
+
+/**
+ * The introduction is already shown as its own message, so the card carries a short
+ * neutral label instead of repeating it. Only the shape of the artefact differs
+ * between the two page types, and the agent's wording is enough to tell them apart.
+ */
+function planTitleFrom(intro: string): string {
+  return /\b(option|options|compare|comparison|side by side)\b/i.test(intro)
+    ? 'Your options, compared'
+    : 'Your itinerary'
+}
+
+/* ------------------------------------------------------------------ trips --- */
+
+async function getJson<T>(url: string): Promise<T> {
+  let res: Response
+  try {
+    res = await fetch(url, { headers: authHeaders(), signal: AbortSignal.timeout(15_000) })
+  } catch {
+    throw new AgentError('The Desk is not reachable from this device right now.')
+  }
+  noteAuth(res)
+  if (!res.ok) throw new AgentError('The Desk could not find that.', res.status >= 500)
+  return (await res.json()) as T
+}
+
+async function postJson<T>(url: string, body?: unknown): Promise<T> {
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body ?? {}),
+      signal: AbortSignal.timeout(15_000),
+    })
+  } catch {
+    throw new AgentError('The Desk is not reachable from this device right now. Nothing was sent.')
+  }
+  noteAuth(res)
+  const json = (await res.json().catch(() => ({}))) as T & { error?: string }
+  if (!res.ok) throw new AgentError(json.error ?? 'The Desk could not take that just now. Nothing was sent.', res.status >= 500)
+  return json
+}
+
+/** The member's swaps on an itinerary, as saved by the Itinerary screen. */
+export function savedChoices(key: string): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(`tripagent:choices:${key}`) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+/** The page key is the last segment of a plan URL. */
+export const planKeyOf = (url: string) => url.split('/').filter(Boolean).at(-1) ?? ''
+
+export const fetchPlan = (key: string) => getJson<import('./plan').PlanBundle>(`${BASE}/api/plan/${key}`)
+
+export const fetchTrips = () =>
+  getJson<{ trips: import('./plan').TripSummary[] }>(`${BASE}/api/trips`).then((r) => r.trips)
+
+export const fetchDue = (window: 'day' | 'week' | 'month' = 'month') =>
+  getJson<{ nudges: import('./plan').Nudge[] }>(`${BASE}/api/trips/due?window=${window}`).then((r) => r.nudges)
+
+/**
+ * A member may move a trip between proposed and requested. Booked, and what
+ * follows, is set by the Desk once the payment is seen.
+ */
+export async function setTripStatus(planId: string, status: 'proposed' | 'requested', choices?: Record<string, number>) {
+  try {
+    await postJson(`${BASE}/api/trips/status`, { planId, status, ...(choices ? { choices } : {}) })
+  } catch {
+    /* the calendar catches up the next time a request is filed */
+  }
+}
+
+/* --------------------------------------------------------------- the Desk --- */
+
+export type DeskRequest = import('./desk').DeskRequest
+export type NewDeskRequest = import('./desk').NewDeskRequest
+
+export const fetchRequests = () =>
+  getJson<{ requests: DeskRequest[] }>(`${BASE}/api/requests`).then((r) => r.requests)
+
+export const fileRequest = (input: NewDeskRequest) =>
+  postJson<{ request: DeskRequest }>(`${BASE}/api/requests`, input).then((r) => r.request)
+
+export const requestAction = (id: string, action: 'cancel' | 'paid') =>
+  postJson<{ request: DeskRequest }>(`${BASE}/api/requests/${id}/${action}`).then((r) => r.request)
+
+/* ------------------------------------------------------------------ hotels --- */
+
+export interface HotelRate {
+  id: string
+  name: string
+  address?: string
+  stars?: number
+  image?: string
+  total: number | null
+  perNight: number | null
+  currency: string
+  refundable?: boolean
+  boardBasis?: string
+}
+
+export type RatesResult =
+  | { ok: true; checkedAt: string; hotels: HotelRate[] }
+  | { ok: false; reason: 'not-configured' | 'not-allowed' | 'rejected' | 'unreachable' | 'offline' }
+
+/** Live rates from Tripsure, the only price a member can pay. */
+export async function fetchHotelRates(q: { city: string; checkIn: string; checkOut: string; adults: number; rooms?: number }): Promise<RatesResult> {
+  const qs = new URLSearchParams({ city: q.city, checkIn: q.checkIn, checkOut: q.checkOut, adults: String(q.adults), rooms: String(q.rooms ?? 1) })
+  try {
+    return await getJson<RatesResult>(`${BASE}/api/hotels/rates?${qs}`)
+  } catch {
+    return { ok: false, reason: 'offline' }
+  }
+}
+
+/** Turn a plan URL from the backend into one this app can open. */
+export function proxiedPlanUrl(url: string): string {
+  try {
+    const parsed = new URL(url)
+    return `${BASE}${parsed.pathname}${parsed.search}`
+  } catch {
+    return url
+  }
+}

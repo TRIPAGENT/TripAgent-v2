@@ -1,0 +1,604 @@
+/* ==========================================================================
+   TripAgent · "Nocturne" design system
+   The same stylesheet the design canvas uses (kit.css), so the app and the
+   design stay one system. Edit tokens here; screens use the classes.
+   Obsidian ground · Ivory type · one Champagne accent · Paper for documents
+   Display: Fraunces · Text: Jost · Codes and clocks: system mono
+   Classes carry type, material and components; layout stays inline.
+   ========================================================================== */
+
+:root {
+  /* Ground — warm obsidian, never pure black */
+  --ink-0: #0A0A0B;   /* app ground */
+  --ink-1: #111112;   /* raised band */
+  --ink-2: #17171A;   /* card */
+  --ink-3: #202023;   /* elevated / pressed */
+  --ink-4: #2A2A2E;   /* control fill */
+
+  /* Type on ground */
+  --ivory:   #F2EDE4;                 /* primary text  ~17:1 */
+  --ivory-2: rgba(242, 237, 228, .74); /* secondary     ~ 9:1 */
+  --ivory-3: rgba(242, 237, 228, .56); /* tertiary      ~5.6:1 */
+  --line:    rgba(242, 237, 228, .10);
+  --line-2:  rgba(242, 237, 228, .18);
+
+  /* The one accent — champagne, used for state and the single commit action */
+  --champagne:   #D8C29A;
+  --champagne-2: #B99B6B;
+  --champagne-3: rgba(216, 194, 154, .14);
+  --champagne-line: rgba(216, 194, 154, .38);
+
+  /* Document register — the itinerary and the quote are paper */
+  --paper:      #F4EFE6;
+  --paper-2:    #EAE3D7;
+  --paper-ink:  #191613;
+  --paper-ink-2:#5E574E;   /* 5.6:1 on paper */
+  --paper-line: rgba(25, 22, 19, .12);
+  --paper-accent: #8A6A3A; /* champagne, deepened for paper (4.9:1) */
+
+  /* Status (lightness-separated, not hue-only) */
+  --sage:  #9CC5AD;   /* confirmed */
+  --amber: #E6B071;   /* needs a decision / hold expiring */
+  --rose:  #E58C7B;   /* failed */
+
+  /* Glass */
+  --glass:        rgba(16, 16, 18, .52);
+  --glass-strong: rgba(14, 14, 16, .78);
+  --glass-light:  rgba(242, 237, 228, .10);
+  --glass-edge:   rgba(255, 255, 255, .14);
+
+  /* Radii */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* Elevation */
+  --shadow-float: 0 18px 48px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35);
+  --shadow-card:  0 10px 30px rgba(0, 0, 0, .35);
+  --shadow-orb:   0 10px 28px rgba(216, 194, 154, .28), 0 2px 6px rgba(0, 0, 0, .5);
+
+  /* Families */
+  /* Two families, never a third. The mono stack is a utility for codes and
+     clocks, not a brand face: system metal, never downloaded. */
+  --f-display: 'Fraunces', 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  --f-sans: 'Jost', 'Work Sans', -apple-system, 'Helvetica Neue', sans-serif;
+  --f-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Motion (documented; used by prototypes) */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.26, .64, 1);
+}
+
+/* ---------- Base ---------- */
+.k-app {
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--ink-0);
+  color: var(--ivory);
+  font-family: var(--f-sans);
+  font-size: 16px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01' 1;
+}
+/* The `.k-app` wrapper below exists on the design canvas but not in the app,
+   where Tailwind's preflight does the same job — with one exception it does
+   not cover. A <button> keeps the user agent's `text-align: center`, so every
+   row button in the app was centring its label and value inside a left-aligned
+   list. Zero specificity, so a `text-center` utility still wins where one is
+   actually wanted. */
+:where(button) { text-align: inherit; }
+
+/* Resets use :where() so they carry zero specificity and never beat a component class */
+:where(.k-app) *, :where(.k-app) *::before, :where(.k-app) *::after { box-sizing: border-box; }
+:where(.k-app) :where(h1, h2, h3, h4, p, figure, ul, ol, dl, dd, blockquote) { margin: 0; padding: 0; }
+:where(.k-app) :where(ul, ol) { list-style: none; }
+:where(.k-app) :where(a) { color: inherit; text-decoration: none; }
+:where(.k-app) :where(button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+:where(.k-app) :where(input, textarea, select) { font: inherit; color: inherit; }
+:where(.k-app) :where(img) { display: block; }
+:where(.k-app) :where(svg) { flex-shrink: 0; }
+
+/* ---------- Typography ---------- */
+.t-display-xxl { font-family: var(--f-display); font-optical-sizing: auto; font-weight: 400; font-size: 50px; line-height: 54px; letter-spacing: -0.02em; text-wrap: balance; }
+.t-display-xl  { font-family: var(--f-display); font-optical-sizing: auto; font-weight: 400; font-size: 41px; line-height: 45px; letter-spacing: -0.018em;  text-wrap: balance; }
+.t-display-l   { font-family: var(--f-display); font-optical-sizing: auto; font-weight: 400; font-size: 34px; line-height: 39px; letter-spacing: -0.015em; text-wrap: balance; }
+.t-display-m   { font-family: var(--f-display); font-optical-sizing: auto; font-weight: 400; font-size: 27px; line-height: 33px; letter-spacing: -0.012em; text-wrap: balance; }
+.t-display-s   { font-family: var(--f-display); font-optical-sizing: auto; font-weight: 500; font-size: 22px; line-height: 29px; letter-spacing: -0.008em; text-wrap: balance; }
+/* The brand's signature move: exactly one italic phrase per display headline,
+   and that phrase is the only word in the accent colour. */
+.t-italic      { font-style: italic; color: var(--champagne); }
+.k-paper .t-italic { color: var(--paper-accent); }
+.t-italic-plain { font-style: italic; color: inherit; }
+
+.t-title   { font-family: var(--f-sans); font-weight: 500; font-size: 17px; line-height: 22px; letter-spacing: -0.01em; }
+.t-title-s { font-family: var(--f-sans); font-weight: 500; font-size: 15px; line-height: 20px; letter-spacing: -0.005em; }
+.t-body    { font-family: var(--f-sans); font-weight: 400; font-size: 16px; line-height: 24px; text-wrap: pretty; }
+.t-body-s  { font-family: var(--f-sans); font-weight: 400; font-size: 14px; line-height: 21px; text-wrap: pretty; }
+.t-caption { font-family: var(--f-sans); font-weight: 400; font-size: 13px; line-height: 18px; color: var(--ivory-2); }
+.t-label   { font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: 0.14em; text-transform: uppercase; }
+.t-mono    { font-family: var(--f-mono); font-weight: 400; font-size: 12px; line-height: 16px; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.t-figure  { font-family: var(--f-sans); font-variant-numeric: tabular-nums lining-nums; }
+
+.c-ivory   { color: var(--ivory); }
+.c-ivory-2 { color: var(--ivory-2); }
+.c-ivory-3 { color: var(--ivory-3); }
+.c-champagne { color: var(--champagne); }
+.c-sage  { color: var(--sage); }
+.c-amber { color: var(--amber); }
+
+/* ---------- Photography ---------- */
+.k-photo { position: relative; overflow: hidden; background: var(--ink-2); }
+.k-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(.92) contrast(1.03); }
+/* legibility veils — sharp, directional, never a flat wash */
+.k-veil-top    { position: absolute; left: 0; right: 0; top: 0; height: 180px; background: linear-gradient(180deg, rgba(10,10,11,.62) 0%, rgba(10,10,11,.28) 45%, rgba(10,10,11,0) 100%); pointer-events: none; }
+.k-veil-bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 62%; background: linear-gradient(0deg, rgba(10,10,11,1) 0%, rgba(10,10,11,.9) 26%, rgba(10,10,11,.62) 48%, rgba(10,10,11,.22) 76%, rgba(10,10,11,0) 100%); pointer-events: none; }
+/* Full height, so a 168px card is as legible as a 440px one, with the top of
+   the frame still reading as photography rather than as a grey wash. */
+.k-veil-card   { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(8,8,9,.96) 0%, rgba(8,8,9,.88) 20%, rgba(8,8,9,.62) 44%, rgba(8,8,9,.30) 68%, rgba(8,8,9,.06) 88%, rgba(8,8,9,0) 100%); pointer-events: none; }
+
+/* ---------- Materials ---------- */
+.k-glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+.k-glass-strong {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), var(--shadow-float);
+}
+.k-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+.k-card-raised { background: var(--ink-3); border: 1px solid var(--line-2); border-radius: var(--r-md); box-shadow: var(--shadow-card); }
+.k-rule { height: 1px; background: var(--line); border: 0; }
+
+/* Paper — the document register (itinerary sheet, quote letter) */
+.k-paper {
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: var(--r-lg);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .45);
+}
+.k-paper .t-caption { color: var(--paper-ink-2); }
+.k-paper .k-rule { background: var(--paper-line); }
+
+/* Obsidian metal — the membership card */
+.k-metal {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.07) 45%, rgba(255,255,255,0) 60%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0px, rgba(255,255,255,.018) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px),
+    linear-gradient(160deg, #26262A 0%, #121214 48%, #1B1B1E 100%);
+  border: 1px solid rgba(216, 194, 154, .30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.6), 0 30px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6);
+  color: var(--ivory);
+}
+.k-engrave { color: rgba(242, 237, 228, .86); text-shadow: 0 -1px 0 rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.06); }
+
+/* The working light — the Concierge's signature "thinking" sweep */
+.k-sweep {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(216,194,154,0) 0%, rgba(216,194,154,.0) 35%, rgba(216,194,154,.55) 58%, rgba(216,194,154,0) 60%);
+  background-size: 220% 100%;
+  animation: k-sweep 2.8s var(--ease-out) infinite;
+}
+@keyframes k-sweep { from { background-position: 120% 0; } to { background-position: -40% 0; } }
+@keyframes k-breathe { 0%, 100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.08); opacity: 1; } }
+.k-breathe { animation: k-breathe 3.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .k-sweep, .k-breathe { animation: none; } }
+
+/* ---------- Buttons ---------- */
+.k-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 24px; border-radius: var(--r-pill);
+  font-family: var(--f-sans); font-weight: 500; font-size: 15px; line-height: 20px; letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+.k-btn-primary   { background: var(--ivory); color: var(--ink-0); }
+.k-btn-commit    { background: var(--champagne); color: var(--ink-0); }
+.k-btn-secondary { background: var(--glass-light); color: var(--ivory); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+.k-btn-ghost     { background: transparent; color: var(--ivory); border: 1px solid var(--line-2); }
+.k-btn-paper     { background: var(--paper-ink); color: var(--paper); }
+.k-btn-sm { height: 40px; padding: 0 16px; font-size: 14px; gap: 8px; }
+.k-btn-block { display: flex; width: 100%; }
+
+.k-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: var(--r-pill);
+  background: var(--glass); color: var(--ivory);
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%);
+}
+.k-icon-btn-solid { background: var(--ink-3); border: 1px solid var(--line-2); }
+
+.k-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-sans); font-weight: 500; font-size: 14px; line-height: 20px; color: var(--ivory); }
+.k-link-champagne { color: var(--champagne); }
+
+/* ---------- Chips, pills, evidence ---------- */
+.k-chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px;
+  border-radius: var(--r-pill); border: 1px solid var(--line-2); color: var(--ivory-2);
+  font-family: var(--f-sans); font-weight: 500; font-size: 13px; line-height: 18px; white-space: nowrap;
+}
+.k-chip.is-on { background: var(--ivory); color: var(--ink-0); border-color: var(--ivory); }
+
+.k-glass-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px;
+  border-radius: var(--r-pill); background: rgba(10, 10, 11, .40); border: 1px solid rgba(255, 255, 255, .16);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+  font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; color: var(--ivory); white-space: nowrap;
+}
+
+/* Credentials are evidence: a hairline champagne chip, sentence case */
+.k-cred {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+  border-radius: var(--r-pill); border: 1px solid var(--champagne-line); color: var(--champagne);
+  font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; white-space: nowrap;
+}
+.k-paper .k-cred { border-color: rgba(138, 106, 58, .40); color: var(--paper-accent); }
+
+.k-status {
+  display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 10px 0 9px;
+  border-radius: var(--r-pill); font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; white-space: nowrap;
+  background: rgba(242, 237, 228, .08); color: var(--ivory-2);
+}
+.k-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.k-status-ready    { background: var(--champagne-3); color: var(--champagne); }
+.k-status-ok       { background: rgba(156, 197, 173, .14); color: var(--sage); }
+.k-status-alert    { background: rgba(230, 176, 113, .14); color: var(--amber); }
+.k-status-progress { background: rgba(242, 237, 228, .08); color: var(--ivory-2); }
+.k-paper .k-status { background: rgba(25, 22, 19, .06); color: var(--paper-ink-2); }
+
+.k-badge {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: var(--r-pill); background: var(--champagne); color: var(--ink-0);
+  font-family: var(--f-sans); font-weight: 600; font-size: 11px; line-height: 12px;
+}
+
+/* ---------- Fields ---------- */
+.k-field {
+  display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 18px;
+  border-radius: var(--r-pill); background: var(--ink-2); border: 1px solid var(--line-2); color: var(--ivory);
+}
+.k-field input, .k-field textarea { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; font-size: 16px; line-height: 24px; color: var(--ivory); }
+.k-field input::placeholder, .k-field textarea::placeholder { color: var(--ivory-3); }
+.k-field-label { font-family: var(--f-sans); font-weight: 500; font-size: 13px; line-height: 18px; color: var(--ivory-2); }
+
+/* ---------- Avatar / monogram ---------- */
+.k-monogram {
+  display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(160deg, #2A2A2E, #141416); border: 1px solid var(--champagne-line); color: var(--champagne);
+  font-family: var(--f-display); font-size: 14px; line-height: 14px; letter-spacing: 0.04em;
+}
+
+/* ---------- Tab bar (floating glass capsule + concierge orb) ---------- */
+.k-tabbar {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center;
+  height: 68px; padding: 0 6px; border-radius: 34px;
+  background: rgba(20, 20, 22, .72);
+  -webkit-backdrop-filter: blur(30px) saturate(170%); backdrop-filter: blur(30px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 20px 50px rgba(0, 0, 0, .6);
+}
+.k-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 56px;
+  color: var(--ivory-3); font-family: var(--f-sans); font-weight: 500; font-size: 11px; line-height: 13px; letter-spacing: 0.01em;
+}
+.k-tab.is-active { color: var(--ivory); }
+.k-tab .k-tab-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--champagne); }
+.k-orb {
+  justify-self: center; display: flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; margin-top: -26px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #F3E4C4 0%, #D8C29A 42%, #A88A5B 100%);
+  color: #14110C; border: 1px solid rgba(255, 255, 255, .35);
+  box-shadow: var(--shadow-orb);
+}
+
+/* ---------- Top chrome ---------- */
+.k-wordmark { font-family: var(--f-display); font-weight: 500; font-size: 15px; line-height: 16px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ivory); }
+
+/* ---------- Section rhythm ---------- */
+.k-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.k-eyebrow { font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--champagne); }
+
+/* ---------- Lists ---------- */
+.k-row { display: flex; align-items: center; gap: 14px; min-height: 56px; }
+.k-row + .k-row { border-top: 1px solid var(--line); }
+
+/* ---------- Composer (Concierge) ---------- */
+.k-composer {
+  display: flex; align-items: center; gap: 8px; height: 60px; padding: 0 8px 0 18px; border-radius: 30px;
+  background: rgba(24, 24, 27, .82); border: 1px solid rgba(255, 255, 255, .12);
+  -webkit-backdrop-filter: blur(30px) saturate(160%); backdrop-filter: blur(30px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 16px 40px rgba(0, 0, 0, .5);
+}
+
+/* Message bubbles */
+.k-msg-member { align-self: flex-end; max-width: 300px; padding: 12px 16px; border-radius: 22px 22px 6px 22px; background: var(--ink-4); color: var(--ivory); font-size: 16px; line-height: 23px; }
+.k-msg-concierge { align-self: flex-start; max-width: 342px; color: var(--ivory); font-size: 16px; line-height: 25px; }
+.k-msg-desk { align-self: flex-start; max-width: 320px; padding: 14px 16px; border-radius: 22px 22px 22px 6px; background: var(--paper); color: var(--paper-ink); font-size: 15px; line-height: 22px; }
+
+/* Progress (hold clock, steps) */
+.k-track { height: 3px; border-radius: 3px; background: var(--line-2); overflow: hidden; }
+.k-track > span { display: block; height: 100%; border-radius: 3px; background: var(--champagne); }
+
+/* Scroll rails */
+.k-rail { display: flex; gap: 12px; overflow: hidden; }
+
+/* ---------- The world map (src/components/WorldMap.tsx) ---------- */
+.wm { display: flex; flex-direction: column; gap: 14px; }
+.wm-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 0 24px; }
+.wm-box {
+  position: relative; height: 420px; overflow: hidden; touch-action: none;
+  border-radius: var(--r-lg); background: var(--ink-1); border: 1px solid var(--line);
+}
+.wm-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.wm-land { fill: #141416; stroke: rgba(242,237,228,.09); stroke-width: .75px; }
+.wm-land--covered { fill: #1D1D20; stroke: rgba(242,237,228,.16); }
+.wm-land--active { fill: #26262A; stroke: rgba(216,194,154,.34); }
+.wm-overlay { position: absolute; inset: 0; pointer-events: none; }
+.wm-overlay > * { pointer-events: auto; }
+.wm-pin {
+  position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 7px;
+  height: 28px; margin: -14px 0 0 -4px; padding-right: 6px;
+  font-family: var(--f-sans); font-weight: 500; font-size: 11px; line-height: 14px;
+  color: var(--ivory); white-space: nowrap;
+}
+.wm-pin i { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--champagne); box-shadow: 0 0 0 2px rgba(10,10,11,.85), 0 0 10px rgba(216,194,154,.45); }
+.wm-pin.is-small i { width: 5px; height: 5px; }
+.wm-pin.is-far { opacity: .42; }
+.wm-pin span { text-shadow: 0 1px 4px rgba(0,0,0,.95); }
+.wm-region {
+  position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 12px; border-radius: var(--r-pill);
+  background: var(--glass); border: 1px solid var(--glass-edge); color: var(--ivory);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+  font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; white-space: nowrap;
+}
+.wm-region > span { font-family: var(--f-mono); font-size: 11px; font-variant-numeric: tabular-nums; color: var(--champagne); }
+.wm-controls {
+  position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 4px; padding: 4px;
+  border-radius: var(--r-pill); background: var(--glass-strong); border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
+}
+.wm-controls button { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; color: var(--ivory); }
+.wm-controls button:active { background: var(--glass-light); }
+.wm-loading, .wm-hint {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-family: var(--f-sans); font-size: 13px; line-height: 18px; color: var(--ivory-3); white-space: nowrap;
+}
+.wm-loading { top: 50%; transform: translate(-50%, -50%); }
+.wm-hint {
+  bottom: 14px; padding: 0 14px; height: 32px; display: flex; align-items: center; border-radius: var(--r-pill);
+  background: rgba(10,10,11,.42); border: 1px solid var(--glass-edge); color: var(--ivory-2);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+}
+
+/* ==========================================================================
+   The two registers — tonal rhythm
+   --------------------------------------------------------------------------
+   The house has two grounds, not one. Obsidian carries arrival, photography
+   and the Concierge; ivory carries the lists, the documents and the things a
+   member acts on. A app that is dark all the way down reads as a void, the
+   same way one that is white all the way down reads as a form.
+
+   Both registers are the *same* system: `.k-light` re-declares the tokens, so
+   every `k-*` and `t-*` component re-tones on its own and no screen markup
+   changes. `.k-dark` re-asserts obsidian, so a dark band can sit inside a
+   light screen and a photograph always keeps its light-on-dark type.
+   ========================================================================== */
+
+.k-light {
+  /* Ground — warm ivory, never pure white */
+  --ink-0: #FBF8F3;   /* screen ground */
+  --ink-1: #F5F0E7;   /* raised band  */
+  --ink-2: #FFFFFF;   /* card         */
+  --ink-3: #F2ECE1;   /* elevated / pressed */
+  --ink-4: #E8E0D3;   /* control fill */
+
+  /* Type on ground — the paper register's ink */
+  --ivory:   #191613;                  /* primary   ~15:1 */
+  --ivory-2: rgba(25, 22, 19, .70);    /* secondary ~8.5:1 */
+  --ivory-3: rgba(25, 22, 19, .54);    /* tertiary  ~5.4:1 */
+  --line:    rgba(25, 22, 19, .10);
+  --line-2:  rgba(25, 22, 19, .16);
+
+  /* The one accent, deepened so it holds 4.9:1 on ivory */
+  --champagne:      #8A6A3A;
+  --champagne-2:    #6E5327;
+  --champagne-3:    rgba(138, 106, 58, .12);
+  --champagne-line: rgba(138, 106, 58, .34);
+
+  /* Status, re-cut for a light ground: same hues, inverted lightness */
+  --sage:  #4A7A5C;
+  --amber: #8A5E1C;
+  --rose:  #A34A38;
+
+  /* Glass over ivory is frost, not smoke */
+  --glass:        rgba(255, 255, 255, .64);
+  --glass-strong: rgba(251, 248, 243, .88);
+  --glass-light:  rgba(25, 22, 19, .06);
+  --glass-edge:   rgba(25, 22, 19, .12);
+
+  /* Shadow on paper is a whisper; the obsidian values would read as dirt */
+  --shadow-float: 0 18px 44px rgba(25, 22, 19, .12), 0 2px 8px rgba(25, 22, 19, .06);
+  --shadow-card:  0 8px 24px rgba(25, 22, 19, .06);
+
+  background: var(--ink-0);
+  color: var(--ivory);
+}
+
+/* Re-assert obsidian: a dark band inside a light screen, and — crucially —
+   anything inside a photograph, whose type is always light-on-dark. */
+.k-dark,
+.k-light .k-photo,
+.k-light .k-metal {
+  --ink-0: #0A0A0B;
+  --ink-1: #111112;
+  --ink-2: #17171A;
+  --ink-3: #202023;
+  --ink-4: #2A2A2E;
+  --ivory:   #F2EDE4;
+  --ivory-2: rgba(242, 237, 228, .74);
+  --ivory-3: rgba(242, 237, 228, .56);
+  --line:    rgba(242, 237, 228, .10);
+  --line-2:  rgba(242, 237, 228, .18);
+  --champagne:      #D8C29A;
+  --champagne-2:    #B99B6B;
+  --champagne-3:    rgba(216, 194, 154, .14);
+  --champagne-line: rgba(216, 194, 154, .38);
+  --sage:  #9CC5AD;
+  --amber: #E6B071;
+  --rose:  #E58C7B;
+  --glass:        rgba(16, 16, 18, .52);
+  --glass-strong: rgba(14, 14, 16, .78);
+  --glass-light:  rgba(242, 237, 228, .10);
+  --glass-edge:   rgba(255, 255, 255, .14);
+  --shadow-float: 0 18px 48px rgba(0, 0, 0, .55), 0 2px 8px rgba(0, 0, 0, .35);
+  --shadow-card:  0 10px 30px rgba(0, 0, 0, .35);
+  color: var(--ivory);
+}
+.k-dark { background: var(--ink-0); }
+
+/* ---- Corrections where a component hard-codes a tone -------------------- */
+
+/* A card on ivory needs a shade to lift off the ground; on obsidian it needs
+   a hairline instead, which is what --line already does. */
+.k-light .k-card { box-shadow: 0 1px 2px rgba(25, 22, 19, .04); }
+.k-light .k-card-raised { background: #FFFFFF; }
+
+/* Fills that invert: primary is ink on ivory, and the commit action is bronze
+   with cream type rather than bronze with ink. */
+.k-light .k-btn-primary { background: var(--ivory); color: #FBF8F3; }
+.k-light .k-btn-commit  { background: var(--champagne); color: #FBF8F3; }
+.k-light .k-chip.is-on  { background: var(--ivory); color: #FBF8F3; border-color: var(--ivory); }
+.k-light .k-badge       { background: var(--champagne); color: #FBF8F3; }
+
+/* A translucent wash over ivory reads as a grey slab, so the secondary fill
+   and the icon buttons become a clean sheet with a hairline instead. */
+.k-light .k-btn-secondary,
+.k-light .k-icon-btn { background: #FFFFFF; border-color: var(--line-2); }
+.k-light .k-btn-ghost { border-color: var(--line-2); }
+
+/* — but a control sitting on a photograph is glass in both registers. An
+   opaque white disc over an image reads as a consumer app; glass reads as a
+   control belonging to the picture. The tokens inside are already obsidian,
+   so this only has to undo the literal white above. */
+.k-light .k-photo .k-btn-secondary,
+.k-light .k-photo .k-icon-btn,
+.k-light .k-dark .k-btn-secondary,
+.k-light .k-dark .k-icon-btn {
+  background: var(--glass);
+  border-color: var(--glass-edge);
+}
+.k-light .k-photo .k-icon-btn-solid,
+.k-light .k-dark .k-icon-btn-solid { background: var(--ink-3); border-color: var(--line-2); }
+
+/* Glass loses its white inner edge on a light ground, and gains a hairline. */
+.k-light .k-glass,
+.k-light .k-glass-strong { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
+.k-light .k-glass-strong { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), var(--shadow-float); }
+.k-light .k-icon-btn-solid { background: var(--ink-3); }
+
+/* The neutral status pill and the composer are the two places with a literal
+   obsidian wash in them. */
+.k-light .k-status,
+.k-light .k-status-progress { background: rgba(25, 22, 19, .06); color: var(--ivory-2); }
+.k-light .k-status-ok    { background: rgba(74, 122, 92, .12); }
+.k-light .k-status-alert { background: rgba(138, 94, 28, .12); }
+.k-light .k-composer {
+  background: #FFFFFF;
+  border-color: var(--line-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 10px 30px rgba(25, 22, 19, .08);
+}
+.k-light .k-track { background: rgba(25, 22, 19, .12); }
+
+/* The seal, the monogram and the orb are metal objects: they keep their own
+   material in both registers, which is what makes them read as objects. */
+
+/* A document laid on ivory is a sheet, not a contrast device — it earns an
+   edge instead of a tone. */
+.k-light .k-paper { background: #FFFFFF; border: 1px solid var(--paper-line); }
+
+/* The photographic hero of a light screen still wants a dark status bar area,
+   and its veils are already obsidian, so nothing to correct there. */
+
+/* ---- Chrome is obsidian on both grounds ---------------------------------
+   The tab bar and the dock carry `k-dark` so their type never inherits the
+   light register. They keep their own glass rather than `k-dark`'s flat
+   ground, and they sit a good deal more opaque than they did over obsidian:
+   a 72%-black capsule over ivory is a grey smear, and the labels went with
+   it. This is also where the app gets its black in between — one dark object
+   held constant on every screen. */
+.k-tabbar.k-dark {
+  background: rgba(13, 13, 15, .93);
+  border-color: rgba(255, 255, 255, .10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 16px 40px rgba(25, 22, 19, .28);
+}
+.k-light .k-tabbar.k-dark { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 14px 36px rgba(25, 22, 19, .22); }
+
+/* The dock is a `k-dark` wrapper, so its glass already resolves obsidian; it
+   only needs the opacity lift and a shadow that reads against ivory. */
+.k-dark .k-glass-strong { background: rgba(13, 13, 15, .93); border-color: rgba(255, 255, 255, .10); }
+.k-light .k-dark .k-glass-strong { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px rgba(25, 22, 19, .28); }
+
+/* ---- The AI mark --------------------------------------------------------
+   Tara is a model, and the app says so wherever her name carries weight. A
+   hairline champagne mark rather than a filled badge: evidence, in the same
+   voice as `k-cred`, not a product sticker shouting AI. */
+.k-ai-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 16px; padding: 0 5px; border-radius: 4px;
+  border: 1px solid var(--champagne-line); color: var(--champagne);
+  font-family: var(--f-sans); font-weight: 600; font-size: 9px; line-height: 1;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  transform: translateY(-1px);
+}
+
+/* ---- Disclosure ---------------------------------------------------------
+   Reference material folded to a heading. The hairline between rows is what
+   makes a stack of them read as one index rather than as loose buttons. */
+.k-disclosure + .k-disclosure { border-top: 1px solid var(--line); }
+.k-disclosure-glyph {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--champagne-3); color: var(--champagne);
+}
+
+/* ---- The room, on ivory -------------------------------------------------
+   Tara's room used to be the one screen that was obsidian end to end, which
+   made the itinerary it produces look like a different product. The room is
+   ivory now and the weight moved into the pieces: the member's own words in
+   obsidian, Tara's reply as plain ink, the Desk's note as a letter with a
+   champagne edge. The composer stays obsidian because it is chrome. */
+/* The composer sits inside the light screen but carries `k-dark`; without
+   this the light correction above still matches it by ancestry and paints it
+   white. It is chrome, so it is obsidian. */
+.k-light .k-dark .k-composer {
+  background: rgba(13, 13, 15, .95);
+  border-color: rgba(255, 255, 255, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 14px 36px rgba(25, 22, 19, .22);
+}
+
+.k-light .k-msg-member {
+  background: #191613;
+  color: #F6F2EA;
+}
+.k-light .k-msg-desk {
+  background: #FFFFFF;
+  color: var(--paper-ink);
+  border: 1px solid var(--paper-line);
+  border-left: 2px solid var(--champagne-line);
+  box-shadow: 0 1px 2px rgba(25, 22, 19, .04);
+}

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Refuses a commit that carries a key. Installed by `npm install` (prepare).
+node scripts/check-secrets.mjs --staged || exit 1

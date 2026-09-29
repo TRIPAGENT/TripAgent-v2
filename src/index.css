@@ -1,0 +1,125 @@
+@import './styles/nocturne.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   App base — Nocturne is dark-first. The body is the obsidian ground, so every
+   screen starts dark even before its own styles arrive.
+   ========================================================================== */
+@layer base {
+  html, body { width: 100%; margin: 0; padding: 0; }
+  html { background: #0A0A0B; color-scheme: dark; }
+  body {
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--ink-0);
+    color: var(--ivory);
+    font-family: var(--f-sans);
+    font-size: 16px;
+    line-height: 24px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::-webkit-scrollbar { display: none; }
+  * { scrollbar-width: none; }
+  :focus-visible { outline: 2px solid var(--champagne); outline-offset: 3px; border-radius: 8px; }
+  ::selection { background: rgba(216, 194, 154, .35); color: var(--ivory); }
+  input, textarea, select { color-scheme: dark; }
+}
+
+/* ==========================================================================
+   The previous "Private Atelier" component classes, re-expressed in Nocturne.
+   Screens are being rebuilt on the k-* / t-* classes; anything that still
+   uses an older class reads correctly on the dark ground instead of breaking.
+   ========================================================================== */
+@layer components {
+  .eyebrow { font-family: var(--f-sans); font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: .14em; text-transform: uppercase; color: var(--ivory-3); }
+  .eyebrow-rule, .eyebrow-rule-accent { display: none; }
+  .headline { font-family: var(--f-display); font-weight: 400; letter-spacing: -0.015em; line-height: 1.1; color: var(--ivory); text-wrap: balance; }
+  .sig { font-family: var(--f-display); font-style: italic; color: inherit; }
+  .lead { font-size: 17px; line-height: 27px; color: var(--ivory-2); max-width: 52ch; }
+  .body-copy { font-size: 15px; line-height: 24px; color: var(--ivory-2); max-width: 62ch; text-wrap: pretty; }
+  .caption { font-size: 13px; line-height: 18px; color: var(--ivory-2); }
+  .meta-tag { font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--champagne); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; padding: 0 24px; border-radius: 999px; font-family: var(--f-sans); font-weight: 500; font-size: 15px; transition: opacity .2s, background-color .2s, transform .2s var(--ease-out); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .4; pointer-events: none; }
+  .btn-primary { @apply btn; background: var(--ivory); color: var(--ink-0); }
+  .btn-outline { @apply btn; border: 1px solid var(--line-2); color: var(--ivory); }
+  .btn-accent { @apply btn; background: var(--champagne); color: var(--ink-0); }
+  .btn-ghost-image { @apply btn; background: var(--glass-light); border: 1px solid var(--glass-edge); color: var(--ivory); backdrop-filter: blur(20px); }
+  .btn-sm { height: 40px; padding: 0 16px; font-size: 14px; }
+
+  .field { width: 100%; border-radius: 16px; background: var(--ink-2); border: 1px solid var(--line-2); padding: 14px 16px; font-size: 16px; color: var(--ivory); }
+  .field::placeholder { color: var(--ivory-3); }
+  .field:focus { outline: none; border-color: var(--champagne-line); }
+
+  .chip { display: inline-flex; flex-shrink: 0; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 13px; font-weight: 500; color: var(--ivory-2); white-space: nowrap; }
+  .chip-active { background: var(--ivory); border-color: var(--ivory); color: var(--ink-0); }
+
+  .hairline { border-top: 1px solid var(--line); }
+  .band-alt { background: var(--ink-1); }
+  .band-dark { background: var(--ink-1); color: var(--ivory); }
+  .card-paper { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .rail { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .scrim { background: linear-gradient(0deg, rgba(10,10,11,.85), rgba(10,10,11,.25)); }
+  .scrim-hero { background: linear-gradient(180deg, rgba(10,10,11,.55) 0%, rgba(10,10,11,0) 22%, rgba(10,10,11,0) 40%, rgba(10,10,11,.6) 66%, rgba(10,10,11,1) 100%); }
+
+  /* Legal documents, rendered from tripagent.vip's text */
+  .legal h2 { margin-top: 36px; font-family: var(--f-display); font-size: 22px; line-height: 28px; color: var(--ivory); }
+  .legal p, .legal li { margin-top: 12px; font-size: 15px; line-height: 25px; color: var(--ivory-2); }
+  .legal ul { margin-top: 8px; list-style: disc; padding-left: 20px; }
+  .legal a { color: var(--champagne); text-decoration: underline; text-underline-offset: 4px; }
+  .legal b { font-weight: 500; color: var(--ivory); }
+}
+
+/* ==========================================================================
+   Photographs arrive like a page turning, not a pop.
+   ========================================================================== */
+@layer components {
+  .plate:not(.is-loaded) {
+    color: transparent;
+    background: linear-gradient(100deg, #151517 30%, #1d1d20 50%, #151517 70%) 0 0 / 300% 100%;
+    animation: plate-shimmer 1.6s linear infinite;
+  }
+  .plate.is-loaded { animation: plate-in .9s ease both; }
+  @keyframes plate-in { from { opacity: 0; filter: saturate(.6) blur(6px); } to { opacity: 1; filter: none; } }
+  @keyframes plate-shimmer { to { background-position: -300% 0; } }
+
+  .page-in { animation: page-in .5s var(--ease-out) both; }
+  @keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .rise > * { animation: rise .7s var(--ease-out) both; }
+  .rise > *:nth-child(2) { animation-delay: .06s; }
+  .rise > *:nth-child(3) { animation-delay: .12s; }
+  .rise > *:nth-child(4) { animation-delay: .18s; }
+  .rise > *:nth-child(n+5) { animation-delay: .24s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  .kenburns { animation: kenburns 14s ease-out both; }
+  @keyframes kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+
+  .sheet-in { animation: sheet-in .45s var(--ease-spring) both; }
+  @keyframes sheet-in { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .fade-in { animation: fade-in .3s ease both; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  .caret-blink { animation: caret-blink 1.1s steps(1) infinite; }
+  @keyframes caret-blink { 50% { opacity: 0; } }
+
+  /* Splash: the wordmark, then the door */
+  .splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: var(--ink-0); color: var(--ivory); transition: opacity .7s ease, visibility .7s; }
+  .splash.is-done { opacity: 0; visibility: hidden; }
+  .splash-mark { font-family: var(--f-display); font-weight: 500; font-size: 18px; letter-spacing: .34em; text-transform: uppercase; animation: rise 1s var(--ease-out) both; }
+  .splash-line { width: 64px; height: 1px; background: var(--line-2); overflow: hidden; }
+  .splash-line::after { content: ""; display: block; height: 100%; background: var(--champagne); animation: line-fill 1.1s ease both; transform-origin: left; }
+  .splash-sub { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ivory-3); animation: rise 1s .2s both; }
+  @keyframes line-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kenburns, .rise > *, .page-in, .sheet-in, .fade-in, .plate.is-loaded, .caret-blink { animation: none; }
+}
