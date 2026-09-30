@@ -452,3 +452,38 @@ export function proxiedPlanUrl(url: string): string {
     return url
   }
 }
+
+/* --------------------------------------------------------- asking to join --- */
+
+/**
+ * Ask the Desk for an invitation.
+ *
+ * The only call this app makes without a session. It records an ask and returns
+ * nothing about the person: whether an address is already on the list is not
+ * something a stranger should be able to probe for, so the answer reads the same
+ * either way. No code is issued here — a person at the Desk decides.
+ */
+export async function requestAccess(input: {
+  name: string
+  email: string
+  phone: string
+  note?: string
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  let res: Response
+  try {
+    res = await fetch(`${BASE}/api/access-request`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      signal: AbortSignal.timeout(15_000),
+    })
+  } catch {
+    return { ok: false, error: 'We could not reach the Desk just now. Try again in a moment.' }
+  }
+  if (res.ok) return { ok: true }
+  const body = (await res.json().catch(() => null)) as { error?: string } | null
+  return {
+    ok: false,
+    error: body?.error ?? 'That did not go through. Check the details and try again.',
+  }
+}

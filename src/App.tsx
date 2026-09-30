@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { lazy, Suspense, type ReactElement } from 'react'
 import { useStore } from '@/context/store'
 import SignIn from '@/screens/SignIn'
+import RequestAccess from '@/screens/RequestAccess'
 import Onboarding from '@/screens/Onboarding'
 import Discover from '@/screens/Discover'
 import City from '@/screens/City'
@@ -49,6 +50,7 @@ export default function App() {
     <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--ink-0)' }} />}>
     <Routes>
       <Route path="/signin" element={member ? <Navigate to="/" replace /> : <SignIn />} />
+      <Route path="/request-access" element={member ? <Navigate to="/" replace /> : <RequestAccess />} />
       <Route
         path="/onboarding"
         element={

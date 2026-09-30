@@ -236,6 +236,16 @@ export default function SignIn() {
           <footer className="mt-8 flex flex-col items-center gap-2 text-center">
             <p className="t-caption c-ivory-3">
               Not yet invited?{' '}
+              <Link
+                to="/request-access"
+                className="c-ivory-2 underline underline-offset-4"
+                style={{ textDecorationColor: 'var(--line-2)' }}
+              >
+                Ask for an invitation
+              </Link>
+            </p>
+            <p className="t-caption c-ivory-3">
+              or write to{' '}
               <a
                 href={`mailto:${DESK.invite}`}
                 className="c-ivory-2 underline underline-offset-4"
