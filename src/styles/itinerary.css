@@ -102,16 +102,26 @@
 
 /* ----------------------------------------------------------- definitions -- */
 
+/* The trip's terms as one object rather than four loose rows: a member skims
+   this before anything else, and a boxed list reads as a single answer. */
+.it-glance {
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 4px 18px;
+  box-shadow: 0 1px 2px rgba(25, 22, 19, .04);
+}
 .it-defrow {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 12px 0;
+  padding: 14px 0;
   border-top: 1px solid var(--line);
 }
-.it-defrow:last-child {
-  border-bottom: 1px solid var(--line);
-}
+.it-glance > .it-defrow:first-child { border-top: 0; }
+.it-glance > .it-defrow:last-child { border-bottom: 0; }
 .it-defvalue {
   font-weight: 400;
 }

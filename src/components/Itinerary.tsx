@@ -91,8 +91,20 @@ const chipDate = (iso?: string) => {
 const codeOf = (city?: string) => city?.match(/\b([A-Z]{3})\b/)?.[1] ?? null;
 
 /** A price written as a sentence wraps in the text face instead of overflowing. */
-const priceClass = (price: string) =>
-  `it-price${(price ?? "").length > 22 ? " it-price--long" : ""}`;
+/**
+ * A price is set as a figure only when it is one.
+ *
+ * The backend's price field carries both real amounts ("₹12,40,000", "₹12-17
+ * lakh") and honest prose where there is no number yet ("Live fare to confirm",
+ * "Rate to confirm", "Not checked"). Setting prose in the 21px display face with
+ * `white-space: nowrap` pushed it straight out of the boarding pass. Digits are
+ * the test, not length: no digit means it is a sentence, and sentences wrap.
+ */
+const priceClass = (price: string) => {
+  const p = price ?? "";
+  const isFigure = /\d/.test(p) && p.length <= 22;
+  return `it-price${isFigure ? "" : " it-price--long"}`;
+};
 
 /**
  * What the line's own price string says about it. The vocabulary is the
@@ -1074,9 +1086,12 @@ export function Itinerary({
             </section>
           ) : null}
 
+          {/* The trip's terms, boxed. "The shape" said nothing to a member
+              reading it for the first time; these four lines are the answer to
+              "what actually is this trip", so the heading says that instead. */}
           <section className="flex flex-col gap-5 px-6 pt-14">
-            <h2 className="t-display-s">The shape</h2>
-            <dl className="flex flex-col">
+            <h2 className="t-display-s">At a glance</h2>
+            <dl className="it-glance">
               {p.shape.map((r) => (
                 <div key={r.k} className="it-defrow">
                   <dt className="t-caption c-ivory-3">{r.k}</dt>
