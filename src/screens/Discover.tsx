@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
 import { SearchOverlay } from '@/components/SearchOverlay'
-import { Band, Chip, Icon, Photo, Rail, Section, SectionHead, Status, Track } from '@/components/ui'
+import { Band, Chip, Icon, Photo, Rail, Section, SectionHead, Status, Track, Wordmark } from '@/components/ui'
 import { CITIES, CITY_BY_SLUG, MONTHS, SERVICES } from '@/data/catalogue.generated'
 import { brandImage, cityCard, cityHero } from '@/lib/catalogue'
 import type { CitySummary } from '@/lib/catalogue'
@@ -159,7 +159,7 @@ export default function Discover() {
             {initials(member?.name)}
           </button>
 
-          <span className="k-wordmark">TripAgent</span>
+          <Wordmark size={15} />
 
           <button
             type="button"

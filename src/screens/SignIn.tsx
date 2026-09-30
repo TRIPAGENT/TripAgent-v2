@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Btn, Horizon, Icon, Photo, Seal } from '@/components/ui'
+import { Btn, Icon, Mark, Photo, Seal, Wordmark } from '@/components/ui'
 import { useStore } from '@/context/store'
 import { brandImage } from '@/lib/catalogue'
 import { ADVISOR, DESK, isValidCode, normaliseCode } from '@/data/members'
@@ -92,9 +92,7 @@ export default function SignIn() {
           }}
         >
           <header className="flex flex-col items-center gap-3">
-            <p className="k-wordmark" style={{ paddingLeft: '0.34em' }}>
-              TripAgent
-            </p>
+            <Wordmark size={18} />
             <p className="t-label c-ivory-3" style={{ paddingLeft: '0.14em' }}>
               By invitation
             </p>
@@ -339,8 +337,10 @@ export default function SignIn() {
             <div className="relative flex items-start justify-between">
               {/* The mark: glyph and wordmark as one lockup. */}
               <span className="flex items-center gap-2">
-                <Horizon size={16} />
-                <span className="k-wordmark k-engrave" style={{ fontSize: 11, lineHeight: '13px' }}>
+                <span className="k-engrave">
+                  <Mark size={17} strokeWidth={30} />
+                </span>
+                <span className="k-wordmark k-engrave" style={{ fontSize: 12, lineHeight: '14px' }}>
                   TripAgent
                 </span>
               </span>

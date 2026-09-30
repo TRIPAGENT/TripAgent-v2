@@ -331,6 +331,67 @@ export function Seal({ size = 40, className = '' }: { size?: number; className?:
 }
 
 /** Tara's mark. It breathes while Tara is working. */
+/**
+ * The house mark.
+ *
+ * Four round-capped strokes: a bar over an A, the T and the A of TripAgent in
+ * one figure. It is the *house's* mark and is kept distinct from `Horizon`, the
+ * sunrise that belongs to Tara — the brand and the agent are not the same
+ * thing, and a member should not have to wonder which one is speaking.
+ *
+ * It inherits `currentColor`, so it takes the ivory or ink of whatever register
+ * it is dropped into without a variant for each.
+ */
+export function Mark({ size = 24, className = '', strokeWidth }: { size?: number; className?: string; strokeWidth?: number }) {
+  return (
+    <svg
+      viewBox="0 0 420 420"
+      width={size}
+      height={size}
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      className={className}
+      style={{ display: 'block' }}
+    >
+      <g
+        stroke="currentColor"
+        strokeWidth={strokeWidth ?? 26}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M140,135 L280,135" />
+        <path d="M210,135 L210,197" />
+        <path d="M140,285 L210,197 L280,285" />
+        <path d="M174,241 L246,241" />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * The mark and the name, locked up together. The one place the brand is stated
+ * whole: the door, the home header, the card.
+ */
+export function Wordmark({
+  size = 16,
+  showMark = true,
+  className = '',
+}: {
+  size?: number
+  showMark?: boolean
+  className?: string
+}) {
+  return (
+    <span className={`inline-flex items-center ${className}`} style={{ gap: size * 0.44 }}>
+      {showMark ? <Mark size={size * 1.35} /> : null}
+      <span className="k-wordmark" style={{ fontSize: size }}>
+        TripAgent
+      </span>
+    </span>
+  )
+}
+
 export function Horizon({ size = 22, working = false, className = '' }: { size?: number; working?: boolean; className?: string }) {
   return (
     <span className={`inline-flex ${working ? 'k-breathe' : ''} ${className}`} style={{ color: 'var(--champagne)' }}>

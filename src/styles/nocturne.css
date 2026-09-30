@@ -306,7 +306,18 @@
 }
 
 /* ---------- Top chrome ---------- */
-.k-wordmark { font-family: var(--f-display); font-weight: 500; font-size: 15px; line-height: 16px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ivory); }
+/* The wordmark follows the supplied brand lettering: the name set in the house
+   sans, title case, tight — not the letterspaced serif caps this carried before.
+   It locks up with the mark in <Wordmark>. */
+.k-wordmark {
+  font-family: var(--f-sans);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  color: var(--ivory);
+}
 
 /* ---------- Section rhythm ---------- */
 .k-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }

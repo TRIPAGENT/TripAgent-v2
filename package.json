@@ -12,7 +12,8 @@
     "present": "node scripts/present.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
-    "images": "node scripts/hd-images.mjs"
+    "images": "node scripts/hd-images.mjs",
+    "icons": "node scripts/brand-icons.mjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",

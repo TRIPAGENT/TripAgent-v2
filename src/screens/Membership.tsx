@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
-import { Btn, Icon, Status } from '@/components/ui'
+import { Btn, Icon, Mark, Status } from '@/components/ui'
 import { useStore, type Preferences } from '@/context/store'
 import { DESK } from '@/data/members'
 import { isLive, STATUS_LABEL } from '@/lib/desk'
@@ -165,8 +165,11 @@ export default function Membership() {
             style={{ height: 216, padding: '22px 22px 20px' }}
           >
             <div className="flex items-start justify-between">
-              <span className="k-wordmark k-engrave mt-1" style={{ fontSize: 12, lineHeight: '14px' }}>
-                TripAgent
+              <span className="k-engrave mt-1 inline-flex items-center gap-2">
+                <Mark size={16} strokeWidth={30} />
+                <span className="k-wordmark" style={{ fontSize: 13, lineHeight: '15px' }}>
+                  TripAgent
+                </span>
               </span>
               <span
                 aria-hidden="true"

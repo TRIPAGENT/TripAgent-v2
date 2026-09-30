@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Wordmark } from '@/components/ui'
 
 /**
  * The first second of the app: the wordmark on ink while the opening photograph
@@ -41,8 +42,8 @@ export function Splash() {
   if (gone) return null
   return (
     <div className={`splash${done ? ' is-done' : ''}`} aria-hidden style={{ background: 'var(--ink-0)' }}>
-      <span className="splash-mark k-wordmark" style={{ fontSize: 18, paddingLeft: '0.34em' }}>
-        TripAgent
+      <span className="splash-mark">
+        <Wordmark size={19} />
       </span>
       <span className="splash-line" />
       <span className="splash-sub t-label c-ivory-3" style={{ paddingLeft: '0.14em' }}>
