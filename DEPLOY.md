@@ -146,6 +146,12 @@ listing. It is an installable PWA:
 
 Two things to get right on the host, both already set in `vercel.json`:
 
+> **Why `/sw.js` is served `max-age=0, must-revalidate`:** the service worker decides
+> what every later visit is allowed to cache, so it must never be served from cache
+> itself, or a member can be pinned to a stale build indefinitely. The manifest changes
+> rarely but must not be sticky either. (This note lives here because `vercel.json` is
+> JSON — it has no comments, and Vercel rejects unknown properties on a header rule.)
+
 - `/sw.js` and `/manifest.webmanifest` must be served from the site root, uncached or
   briefly cached, so an update is actually seen.
 - The SPA rewrite must not swallow them — the existing rule already excludes
