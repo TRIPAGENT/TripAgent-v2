@@ -62,7 +62,7 @@ const FORMS: Record<Kind, { number: string; title: string; accent: string; lede:
 export default function ServiceEnquiry() {
   const { kind } = useParams<{ kind: Kind }>()
   const navigate = useNavigate()
-  const { pushChat, refreshRequests } = useStore()
+  const { refreshRequests } = useStore()
   const [values, setValues] = useState<Record<string, string>>({})
   const [filed, setFiled] = useState<{ id: string; opening: string } | null>(null)
   const [sending, setSending] = useState(false)
@@ -119,7 +119,6 @@ export default function ServiceEnquiry() {
   function continueWithConcierge() {
     if (!filed) return
     // Seed the thread so Tara opens already holding the detail.
-    pushChat({ id: `enq-${Date.now()}`, role: 'member', text: filed.opening, at: Date.now() })
     navigate('/concierge', { state: { send: filed.opening, query: filed.opening } })
   }
 

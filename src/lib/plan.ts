@@ -5,9 +5,9 @@
  */
 
 export interface FlightLeg {
-  depTime: string
+  depTime?: string
   depCity: string
-  arrTime: string
+  arrTime?: string
   arrCity: string
   flightNos?: string
   duration?: string
@@ -34,6 +34,7 @@ export interface Choice {
   details: string
   why: string
   tradeoff: string
+  priceEvidence?: { provider: 'web'; source: string; checkedAt: string; basis: string; unit: string; match: 'exact' | 'from'; terms: string }
   price: string
   source?: string
   checked?: string

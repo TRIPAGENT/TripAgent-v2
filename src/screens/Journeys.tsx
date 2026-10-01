@@ -87,6 +87,11 @@ export default function Journeys() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [member?.code])
 
+  useEffect(() => {
+    window.addEventListener('tripagent:plan-ready', load)
+    return () => window.removeEventListener('tripagent:plan-ready', load)
+  }, [load])
+
   // A hold is a clock. It counts down while the screen is open.
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 60_000)

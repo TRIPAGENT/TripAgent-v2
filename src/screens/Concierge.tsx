@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useChatRuntime } from '@/context/chatRuntime'
+import { planKeyFrom } from '@/lib/planLinks'
 import { Screen } from '@/components/Shell'
 import { AgentMark, Btn, Card, Horizon, Icon } from '@/components/ui'
 import { useStore, type Preferences } from '@/context/store'
@@ -12,7 +14,7 @@ import {
   AgentError,
   agentHealth,
   labelForTool,
-  streamFromAgent,
+  toChatMessages,
   type AgentHealth,
 } from '@/lib/agentClient'
 
@@ -150,19 +152,20 @@ export default function Concierge() {
   const navigate = useNavigate()
   const location = useLocation()
   const {
-    member, chat, pushChat, activeCity, requests, wishlist, itinerary, setPlan, prefs,
+    member, chat, pushChat, activeCity, requests, wishlist, itinerary, prefs,
   } = useStore()
+  const displayChat = useMemo(() => chat.flatMap(m => m.role === 'ai' && !m.release ? toChatMessages([m.text]).map((parsed, i) => ({ ...m, ...parsed, id: `${m.id}-display-${i}`, at: m.at, failed: m.failed })) : [m]), [chat])
   const openRequest = requests.find((r) => !['closed', 'cancelled'].includes(r.status)) ?? null
   const said = fileLine(prefs)
 
   const [draft, setDraft] = useState('')
-  const [thinking, setThinking] = useState(false)
+  const runtime = useChatRuntime()
+  const [localThinking, setLocalThinking] = useState(false)
+  const thinking = localThinking || runtime.submitting || runtime.job?.status === 'running'
   const [health, setHealth] = useState<AgentHealth | null | undefined>(undefined)
   const [lastSent, setLastSent] = useState<string | null>(null)
-  /** What Tara is saying as it says it, before the turn is committed. */
-  const [partial, setPartial] = useState('')
-  /** What Tara is doing right now, when it is working rather than talking. */
-  const [activity, setActivity] = useState<string | null>(null)
+  const partial = runtime.job?.status === 'running' ? runtime.job.partial : ''
+  const activity = runtime.job?.status === 'running' && runtime.job.activity ? labelForTool(runtime.job.activity) : null
   // Rotating language of the work, so a long build never reads as a hang.
   const thinkingWord = useThinkingWord(thinking && !partial)
   /** Real seconds since this turn began, for the working card. */
@@ -273,11 +276,11 @@ export default function Concierge() {
   // The turn's own clock, in real seconds.
   useEffect(() => {
     if (!thinking) return
-    const started = Date.now()
+    const started = runtime.job?.startedAt ? Date.parse(runtime.job.startedAt) : Date.now()
     setElapsed(0)
     const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000)
     return () => window.clearInterval(id)
-  }, [thinking])
+  }, [thinking, runtime.job?.startedAt])
 
   /**
    * The live Tara is the TripAgent backend: it owns the voice, the member's
@@ -286,76 +289,32 @@ export default function Concierge() {
    * screen says which one is answering. We never present the stand-in as the
    * Tara.
    */
-  const reply = useCallback(
-    async (body: string) => {
-      setLastSent(body)
-      setThinking(true)
-
-      // The cached health may be stale — Tara can have come back since
-      // the last probe. Check once more before falling back, so a restarted
-      // backend is used straight away rather than a whole turn being answered by
-      // the stand-in.
-      let answering = live
-      if (!answering) {
-        const fresh = await agentHealth()
-        setHealth(fresh)
-        answering = Boolean(fresh?.ok && fresh.modelReady)
+  const reply = useCallback(async (body: string) => {
+    setLastSent(body)
+    if (live || runtime.job?.status === 'running') {
+      try { await runtime.submit(body) }
+      catch (error) { pushChat(msg('ai', error instanceof Error ? error.message : 'Tara could not receive that message.', { failed: true })) }
+      return
+    }
+    setLocalThinking(true)
+    try {
+      const fresh = await agentHealth()
+      setHealth(fresh)
+      if (fresh?.ok && fresh.modelReady) await runtime.submit(body)
+      else {
+        pushChat(msg('member', body))
+        respond(body, city, chat.filter(m => m.role === 'member').length).forEach(pushChat)
       }
+    } catch (error) { pushChat(msg('ai', error instanceof AgentError ? error.message : 'Tara could not receive that message.', { failed: true })) }
+    finally { setLocalThinking(false) }
+  }, [live, runtime, pushChat, city, chat])
 
-      if (!answering) {
-        const turn = chat.filter((m) => m.role === 'member').length
-        window.setTimeout(() => {
-          respond(body, city, turn).forEach(pushChat)
-          setThinking(false)
-        }, 500)
-        return
-      }
-
-      setPartial('')
-      setActivity(null)
-
-      try {
-        const replies = await streamFromAgent(body, (event) => {
-          if (event.type === 'text') {
-            // A tool call supersedes whatever preamble came before it.
-            setActivity(null)
-            setPartial((prev) => prev + event.delta)
-          } else if (event.type === 'tool') {
-            setPartial('')
-            setActivity(labelForTool(event.name))
-          }
-        })
-        replies.forEach(pushChat)
-        // A built plan belongs in Journeys, not only in the transcript.
-        const built = replies.find((r) => r.planUrl)
-        if (built?.planUrl) {
-          setPlan({ url: built.planUrl, title: built.release?.title ?? 'Your itinerary', at: Date.now() })
-        }
-      } catch (error) {
-        const message =
-          error instanceof AgentError ? error.message : 'Something went wrong reaching Tara.'
-        pushChat(msg('ai', message, { failed: true }))
-        // A dropped connection may simply have stopped; re-probe so the screen stays true.
-        agentHealth().then(setHealth)
-      } finally {
-        setThinking(false)
-        setPartial('')
-        setActivity(null)
-      }
-    },
-    [chat, city, live, pushChat, setPlan],
-  )
-
-  const send = useCallback(
-    async (text: string) => {
-      const body = text.trim()
-      if (!body || thinking) return
-      pushChat(msg('member', body))
-      setDraft('')
-      await reply(body)
-    },
-    [pushChat, reply, thinking],
-  )
+  const send = useCallback(async (text: string) => {
+    const body = text.trim()
+    if (!body || runtime.submitting) return
+    setDraft('')
+    await reply(body)
+  }, [reply, runtime.submitting])
 
   /**
    * What the rest of the app hands over when it opens Tara.
@@ -610,7 +569,7 @@ export default function Concierge() {
 
       {/* The thread */}
       <div className="flex flex-col gap-4 px-6 pt-4" style={{ paddingBottom: 96 }}>
-        {chat.map((m) => {
+        {displayChat.map((m) => {
           const day = startOfDay(m.at)
           const divider = day !== lastDay
           lastDay = day
@@ -665,9 +624,9 @@ export default function Concierge() {
                         <Icon name="check-circle" size={18} className="c-ivory-3" />
                       </div>
                       <p className="t-display-s">{m.release.title}</p>
-                      <Btn block onClick={() => navigate('/journeys')} iconAfter="forward">
-                        Open it
-                      </Btn>
+                      <Link className="k-btn k-btn-primary k-btn-block" to={m.planUrl && planKeyFrom(m.planUrl) ? `/journeys/${planKeyFrom(m.planUrl)}` : '/journeys'}>
+                        View your itinerary <Icon name="forward" size={18} />
+                      </Link>
                     </Card>
                   )}
                 </div>
@@ -675,6 +634,16 @@ export default function Concierge() {
             </div>
           )
         })}
+
+        {runtime.connectionIssue && <p role="status" className="t-caption">Reconnecting to Tara’s progress. Any request already accepted continues in the background.</p>}
+        {thinking && <div role="status" className="k-card p-4 flex flex-col gap-2">
+          <p className="t-body-s">{runtime.job?.activity?.startsWith('build_')
+            ? 'I’m putting your journey together. This usually takes about two minutes. Add anything else here; I’ll pick it up once this version is ready.'
+            : 'I’m working on your reply. You can add another message while I do.'}</p>
+          {(runtime.job?.messages.filter(m => m.state === 'queued').length ?? 0) > 0 && <p className="t-caption">Your added messages are received and will be answered in order.</p>}
+        </div>}
+
+        {runtime.job?.status === 'failed' && runtime.job.messages.filter(m => m.state === 'failed').map(turn => <button key={turn.id} type="button" className="k-link text-left" disabled={runtime.submitting} onClick={() => setDraft(turn.text)}>Review unsent reply: {turn.text.slice(0, 90)}</button>)}
 
         {/* Working — Tara's signature moment */}
         {thinking && activity && !partial && (
@@ -789,7 +758,7 @@ export default function Concierge() {
           <input
             id="concierge-ask"
             type="text"
-            placeholder="Ask Tara…"
+            placeholder={thinking ? "Anything to add to your journey?" : "Ask Tara…"}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             className="min-w-0 flex-1 bg-transparent outline-none"
@@ -798,13 +767,13 @@ export default function Concierge() {
           <button
             type="submit"
             aria-label="Send"
-            disabled={!draft.trim() || thinking}
+            disabled={!draft.trim() || runtime.submitting}
             className="inline-flex shrink-0 items-center justify-center rounded-full"
             style={{
               width: 44,
               height: 44,
-              background: draft.trim() && !thinking ? 'var(--ivory)' : 'var(--ink-4)',
-              color: draft.trim() && !thinking ? 'var(--ink-0)' : 'var(--ivory-3)',
+              background: draft.trim() && !runtime.submitting ? 'var(--ivory)' : 'var(--ink-4)',
+              color: draft.trim() && !runtime.submitting ? 'var(--ink-0)' : 'var(--ivory-3)',
             }}
           >
             <Icon name="send" size={20} />

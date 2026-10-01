@@ -1,3 +1,4 @@
+import { planLinks, withoutPlanLinks } from './planLinks'
 import type { ChatMessage } from '@/lib/types'
 import { msg } from '@/lib/concierge'
 
@@ -201,7 +202,8 @@ export type StreamEvent =
  * minutes deserves to know it is reading sources rather than inventing.
  */
 const TOOL_LABELS: Record<string, string> = {
-  build_trip_plan: 'Drawing out the days',
+  build_trip_plan: 'Creating your itinerary',
+  search_travel_prices: 'Checking published travel prices',
   build_comparison: 'Laying them side by side',
   get_plan: 'Opening your itinerary',
   web_search: 'Looking it up',
@@ -296,37 +298,22 @@ export async function streamFromAgent(
   return toChatMessages(finalMessages.map((m) => m.trim()).filter(Boolean))
 }
 
-const BARE_URL = /^https?:\/\/\S+$/
-
-/**
- * A built plan arrives as three separate messages: a short introduction, the bare
- * link on its own, and a relaxed invitation. The app renders that trio as one
- * release card rather than three bubbles — the link is the artefact, not a line of
- * text — and keeps any surrounding conversation as ordinary messages.
- */
+/** Recognise bare, Markdown and inline itinerary links, without swallowing other links. */
 export function toChatMessages(parts: string[]): ChatMessage[] {
   const out: ChatMessage[] = []
-  const linkIndex = parts.findIndex((p) => BARE_URL.test(p))
-
-  if (linkIndex === -1) {
-    for (const p of parts) out.push(msg('ai', p))
-    return out
+  const seen = new Set<string>()
+  for (const part of parts) {
+    const links = planLinks(part)
+    if (!links.length) { out.push(msg('ai', part)); continue }
+    const text = withoutPlanLinks(part)
+    for (const link of links) {
+      if (seen.has(link.key)) continue
+      seen.add(link.key)
+      out.push(msg('ai', text || 'Your itinerary is ready.', {
+        release: { version: planVersionFrom(link.url), title: planTitleFrom(text) }, planUrl: link.url,
+      }))
+    }
   }
-
-  const intro = parts.slice(0, linkIndex).join('\n\n').trim()
-  const url = parts[linkIndex].trim()
-  const invitation = parts.slice(linkIndex + 1).join('\n\n').trim()
-
-  out.push(
-    msg('ai', intro || 'Your plan is ready.', {
-      release: {
-        version: planVersionFrom(url),
-        title: planTitleFrom(intro),
-      },
-      planUrl: url,
-    }),
-  )
-  if (invitation) out.push(msg('ai', invitation))
   return out
 }
 
@@ -495,6 +482,8 @@ export interface PlacePhoto {
   url: string
   attribution: string
   placeName: string
+  googleMapsUri?: string
+  authors?: { name: string; uri?: string }[]
 }
 
 /**
@@ -505,11 +494,11 @@ export interface PlacePhoto {
  * back to the house's own photography — so this never throws and never blocks
  * anything a member is looking at.
  */
-export async function fetchPlacePhoto(q: string, width = 1200): Promise<PlacePhoto | null> {
+export async function fetchPlacePhoto(q: string, width = 1200, expectedName?: string): Promise<PlacePhoto | null> {
   try {
-    const res = await fetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}`, {
+    const res = await fetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}${expectedName ? `&name=${encodeURIComponent(expectedName)}` : ''}`, {
       headers: authHeaders(),
-      signal: AbortSignal.timeout(12_000),
+      signal: AbortSignal.timeout(22_000),
     })
     if (!res.ok) return null
     const body = (await res.json()) as { photo?: PlacePhoto | null }
@@ -518,3 +507,24 @@ export async function fetchPlacePhoto(q: string, width = 1200): Promise<PlacePho
     return null
   }
 }
+
+
+export interface ChatJob {
+  id: string
+  status: 'running' | 'completed' | 'failed'
+  startedAt: string
+  updatedAt: string
+  activity: string | null
+  partial: string
+  error?: string
+  messages: { id: string; text: string; state: 'queued' | 'running' | 'completed' | 'failed'; replies: string[] }[]
+}
+async function jobRequest(path: string, body?: { message: string; requestId: string }): Promise<ChatJob | null> {
+  const res = await fetch(`${BASE}${path}`, { method: body ? 'POST' : 'GET', headers: authHeaders(body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000) })
+  noteAuth(res)
+  const data = await res.json().catch(() => ({})) as { job?: ChatJob; error?: string }
+  if (!res.ok) throw new AgentError(data.error ?? 'Tara’s progress could not be reached. Try again shortly.')
+  return data.job ?? null
+}
+export const currentChatJob = () => jobRequest('/api/chat/jobs/current')
+export const submitChatJob = (message: string, requestId: string) => jobRequest('/api/chat/jobs', { message, requestId })

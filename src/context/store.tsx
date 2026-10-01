@@ -182,7 +182,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setItinerary((prev) => prev.filter((i) => i !== id))
   }, [])
 
-  const pushChat = useCallback((m: ChatMessage) => setChat((prev) => [...prev, m]), [])
+  const pushChat = useCallback((m: ChatMessage) => setChat((prev) => prev.some(existing => existing.id === m.id) ? prev : [...prev, m]), [])
   const resetChat = useCallback(() => setChat([]), [])
 
   const value = useMemo<Store>(

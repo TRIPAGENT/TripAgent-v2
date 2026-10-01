@@ -15,6 +15,7 @@ import type {
   TripPlan,
 } from "@/lib/plan";
 import { splitName } from "@/lib/humanize";
+import type { PlacePhoto } from "@/lib/agentClient";
 import { usePlacePhoto } from "@/lib/usePlacePhoto";
 import {
   Btn,
@@ -246,7 +247,7 @@ function DayStory({
             </GlassChip>
           ) : null}
           {photo ? (
-            <span className="it-credit absolute bottom-3 right-3">{photo.attribution}</span>
+            <PhotoCredit photo={photo} />
           ) : null}
         </Photo>
       ) : null}
@@ -312,11 +313,11 @@ function DayStory({
  */
 function Boarding({ o, chip }: { o: Choice; chip: ReactNode }) {
   const f = o.flight;
-  const state = lineState(o.price);
+  const state = o.priceEvidence ? { tone: "progress" as const, label: "Indicative web price" } : lineState(o.price);
   /* A time if the plan wrote one; otherwise the code, if the city carries one. */
   const dep = f?.depTime?.trim() || codeOf(f?.depCity) || null;
   const arr = f?.arrTime?.trim() || codeOf(f?.arrCity) || null;
-  const scheduled = Boolean(dep && arr);
+  const scheduled = Boolean(f?.depTime && f?.arrTime && /^\d{2}:\d{2}$/.test(f.depTime) && /^\d{2}:\d{2}$/.test(f.arrTime));
   const legs = [f?.duration, f?.cabin].filter(Boolean).join(" · ");
 
   return (
@@ -396,6 +397,7 @@ function Boarding({ o, chip }: { o: Choice; chip: ReactNode }) {
           ) : null}
         </p>
       </div>
+      <div className="px-5 pb-4"><PriceSource choice={o} /></div>
       {o.inclusions?.length ? (
         <div className="px-5 pb-4">
           <Inclusions list={o.inclusions} />
@@ -403,6 +405,23 @@ function Boarding({ o, chip }: { o: Choice; chip: ReactNode }) {
       ) : null}
     </>
   );
+}
+
+function PhotoCredit({ photo }: { photo: PlacePhoto }) {
+  return <span className="it-credit absolute bottom-2 right-2 max-w-[75%] text-right">
+    {photo.googleMapsUri ? <a href={photo.googleMapsUri} target="_blank" rel="noopener noreferrer">Google Maps</a> : 'Google Maps'}
+    {photo.authors?.length ? photo.authors.map((a, i) => <span key={`${a.name}-${i}`}> · {a.uri ? <a href={a.uri} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}</span>) : photo.attribution !== 'Google Maps' ? ` · ${photo.attribution}` : ''}
+  </span>
+}
+function PriceSource({ choice }: { choice: Choice }) {
+  const evidence = choice.priceEvidence
+  if (!evidence) return choice.source && /^https?:\/\//.test(choice.source) ? <a className="k-link" href={choice.source} target="_blank" rel="noopener noreferrer">Price source</a> : null
+  return <div className="t-caption flex flex-col gap-1">
+    <span>{evidence.match === 'exact' ? 'Indicative web price' : 'Public from-rate · not an exact trip quote'} · {evidence.unit}</span>
+    <span>{evidence.basis}</span><span>{evidence.terms}</span>
+    {/^https?:\/\//.test(evidence.source) && <a className="k-link" href={evidence.source} target="_blank" rel="noopener noreferrer">View price source</a>}
+    <span>Checked {evidence.checkedAt.slice(0, 10)} · subject to confirmation</span>
+  </div>
 }
 
 function StayFace({
@@ -416,21 +435,24 @@ function StayFace({
   image: string | null;
   place: string | null;
 }) {
-  const state = lineState(o.price);
+  const state = o.priceEvidence ? { tone: "progress" as const, label: "Indicative web price" } : lineState(o.price);
+  const hotelName = splitName(o.name).name.split(/[·,]/)[0].trim();
+  const photo = usePlacePhoto(`${hotelName}${place ? `, ${place}` : ""}`, hotelName);
+  const src = photo?.url ?? image;
   return (
     <>
-      {image ? (
+      {src ? (
         <Photo
-          src={image}
-          alt={place ? `${place}` : "The city"}
+          src={src}
+          alt={photo?.placeName ?? (place ? `${place} · destination photograph` : "Destination photograph")}
           label={place ?? undefined}
           radius={0}
           className="h-[150px] w-full"
         >
           {/* Captioned with the city, so a city photograph is never read as the hotel. */}
-          {place ? (
+          {photo ? <PhotoCredit photo={photo} /> : place ? (
             <GlassChip className="absolute bottom-3 left-3" icon="pin">
-              {place}
+              {place} · destination photograph
             </GlassChip>
           ) : null}
         </Photo>
@@ -450,6 +472,7 @@ function StayFace({
         ) : null}
         <Inclusions list={o.inclusions} />
         <p className={priceClass(o.price)}>{o.price}</p>
+        <PriceSource choice={o} />
       </div>
     </>
   );
@@ -1001,7 +1024,9 @@ export function Itinerary({
     return out;
   }, [choices, p]);
 
-  const hero = bundle.places.hero ? cityHero(bundle.places.hero) : null;
+  const heroName = bundle.places.hero ? CITY_BY_SLUG[bundle.places.hero]?.name ?? bundle.places.hero : p.places?.[0];
+  const heroPhoto = usePlacePhoto(heroName);
+  const hero = heroPhoto?.url ?? (bundle.places.hero ? cityHero(bundle.places.hero) : null);
   const stayImage = (i: number) =>
     bundle.places.stays[i] ? cityCard(bundle.places.stays[i]!) : null;
   const stayPlace = (i: number) => {
@@ -1054,7 +1079,7 @@ export function Itinerary({
           radius={0}
           eager
           className="absolute inset-0 h-full w-full"
-        />
+        >{heroPhoto && <PhotoCredit photo={heroPhoto} />}</Photo>
         <div className="absolute bottom-7 left-6 right-6 z-[2] flex flex-col items-start gap-2.5">
           {madeFor ? (
             <p className="t-caption c-ivory">Made for {madeFor}</p>
@@ -1237,7 +1262,7 @@ export function Itinerary({
                   })}
                 </dl>
                 <p className="t-caption c-ivory-3">
-                  Indicative until the Desk quotes it. Once quoted, it holds.
+                  Public web prices are indicative. The Desk confirms availability, inclusions and the quote’s validity before booking.
                 </p>
               </article>
             </section>

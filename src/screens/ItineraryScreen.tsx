@@ -5,7 +5,6 @@ import { Btn, Empty, Icon, Status } from '@/components/ui'
 import { Itinerary } from '@/components/Itinerary'
 import { BASE, fetchDue, fetchPlan } from '@/lib/agentClient'
 import { isBooking, isLive, holdLeft } from '@/lib/desk'
-import { msg } from '@/lib/concierge'
 import { humanizePlan } from '@/lib/humanize'
 import type { Nudge, PlanBundle, TripPlan } from '@/lib/plan'
 import { useStore } from '@/context/store'
@@ -21,7 +20,7 @@ import { useStore } from '@/context/store'
 export default function ItineraryScreen() {
   const navigate = useNavigate()
   const { key = '' } = useParams<{ key: string }>()
-  const { member, pushChat, requests, refreshRequests, setBooking } = useStore()
+  const { member, requests, refreshRequests, setBooking } = useStore()
 
   const [bundle, setBundle] = useState<PlanBundle | null>(null)
   const [coming, setComing] = useState<Nudge[]>([])
@@ -49,10 +48,9 @@ export default function ItineraryScreen() {
   /** A message the member has already composed: send it and open Tara. */
   const refine = useCallback(
     (text: string) => {
-      pushChat(msg('member', text))
       navigate('/concierge', { state: { send: text } })
     },
-    [navigate, pushChat],
+    [navigate],
   )
 
   /** A question the member still has to write: Tara opens with it typed. */
