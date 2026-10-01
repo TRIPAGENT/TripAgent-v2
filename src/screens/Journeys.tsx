@@ -142,6 +142,7 @@ export default function Journeys() {
       <Screen tone="light">
         <header className="px-6 pt-16">
           <h1 className="t-display-l">Journeys</h1>
+          <Link to="/preview/itinerary" className="k-link mt-3">Explore a sample itinerary</Link>
         </header>
         <Empty
           icon="cloud-off"
@@ -162,6 +163,7 @@ export default function Journeys() {
       <Screen tone="light">
         <header className="px-6 pt-16">
           <h1 className="t-display-l">Journeys</h1>
+          <Link to="/preview/itinerary" className="k-link mt-3">Explore a sample itinerary</Link>
         </header>
         <Empty
           icon="map"
@@ -203,6 +205,7 @@ export default function Journeys() {
           </button>
         </div>
 
+        <Link to="/preview/itinerary" className="k-link">Explore a sample itinerary</Link>
         <div
           role="tablist"
           aria-label="Show journeys"

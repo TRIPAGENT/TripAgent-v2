@@ -6,6 +6,7 @@ import RequestAccess from '@/screens/RequestAccess'
 import Onboarding from '@/screens/Onboarding'
 import Discover from '@/screens/Discover'
 import City from '@/screens/City'
+import DestinationSearch from '@/screens/DestinationFallback'
 import Month from '@/screens/Month'
 /*
  * The two map screens are split out of the main bundle. Between them they carry
@@ -13,6 +14,7 @@ import Month from '@/screens/Month'
  * every member would otherwise download to open the front door. They arrive
  * when a map is actually opened.
  */
+const ItineraryPreview = lazy(() => import('@/preview/ItineraryPreview'))
 const CityMapScreen = lazy(() => import('@/screens/CityMap'))
 const WorldMapScreen = lazy(() => import('@/screens/WorldMapScreen'))
 import Saved from '@/screens/Saved'
@@ -33,7 +35,7 @@ import Legal from '@/screens/Legal'
 function RequireMember({ children }: { children: ReactElement }) {
   const { member } = useStore()
   const location = useLocation()
-  if (!member) return <Navigate to="/signin" replace state={{ from: location.pathname }} />
+  if (!member) return <Navigate to="/signin" replace state={{ from: location.pathname + location.search }} />
   return children
 }
 
@@ -61,11 +63,13 @@ export default function App() {
       {(
         [
           ['/', <Discover key="d" />],
+          ['/destinations', <DestinationSearch key="ds" />],
           ['/city/:slug', <City key="c" />],
           ['/month/:no', <Month key="m" />],
           ['/city/:slug/map', <CityMapScreen key="cm" />],
           ['/map', <WorldMapScreen key="wm" />],
           ['/saved', <Saved key="sv" />],
+          ['/preview/itinerary', <ItineraryPreview key="preview" />],
           ['/journeys', <Journeys key="j" />],
           ['/journeys/:key', <Itinerary key="it" />],
           ['/concierge', <Concierge key="co" />],

@@ -164,7 +164,7 @@ export default function Concierge() {
   /** What Tara is doing right now, when it is working rather than talking. */
   const [activity, setActivity] = useState<string | null>(null)
   // Rotating language of the work, so a long build never reads as a hang.
-  const thinkingWord = useThinkingWord(thinking && !activity && !partial)
+  const thinkingWord = useThinkingWord(thinking && !partial)
   /** Real seconds since this turn began, for the working card. */
   const [elapsed, setElapsed] = useState(0)
   const [listening, setListening] = useState(false)
@@ -701,7 +701,8 @@ export default function Concierge() {
               <span className="k-track relative block" aria-hidden="true">
                 <span className="k-sweep absolute inset-0" />
               </span>
-              <p className="t-caption">Usually under two minutes</p>
+              <p className="t-body-s c-ivory-2">{thinkingWord}</p>
+              <p className="t-caption">{elapsed >= 60 ? 'Still working on your reply. Thank you for staying with me.' : 'Take a moment. I’m here with your journey.'}</p>
             </div>
             <div className="flex items-center justify-end pt-1" style={{ borderTop: '1px solid var(--line)' }}>
               <button
@@ -710,7 +711,7 @@ export default function Concierge() {
                 className="k-link c-ivory-2"
                 style={{ minHeight: 44 }}
               >
-                Leave — I&rsquo;ll tell you when it&rsquo;s ready
+                View your journeys
                 <Icon name="forward" size={16} />
               </button>
             </div>
@@ -734,8 +735,8 @@ export default function Concierge() {
                 />
               </p>
             ) : (
-              <span className="flex flex-col gap-2.5" aria-live="polite">
-                <span className="t-body-s c-ivory-2">{thinkingWord}…</span>
+              <span className="flex flex-col gap-2.5" role="status" aria-label="Tara is preparing your reply">
+                <span className="t-body-s c-ivory-2" aria-hidden="true">{thinkingWord}</span>
                 <span className="k-track relative block w-24" aria-label="Thinking">
                   <span className="k-sweep absolute inset-0" />
                 </span>
