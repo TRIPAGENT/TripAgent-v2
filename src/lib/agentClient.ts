@@ -487,3 +487,33 @@ export async function requestAccess(input: {
     error: body?.error ?? 'That did not go through. Check the details and try again.',
   }
 }
+
+/* --------------------------------------------------------- place photos --- */
+
+export interface PlacePhoto {
+  url: string
+  attribution: string
+  placeName: string
+}
+
+/**
+ * A photograph of a named place, resolved by the agent.
+ *
+ * The key stays on the server; this gets back a signed URL and the attribution
+ * Google requires us to show. A miss is an ordinary answer — the caller falls
+ * back to the house's own photography — so this never throws and never blocks
+ * anything a member is looking at.
+ */
+export async function fetchPlacePhoto(q: string, width = 1200): Promise<PlacePhoto | null> {
+  try {
+    const res = await fetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}`, {
+      headers: authHeaders(),
+      signal: AbortSignal.timeout(12_000),
+    })
+    if (!res.ok) return null
+    const body = (await res.json()) as { photo?: PlacePhoto | null }
+    return body.photo ?? null
+  } catch {
+    return null
+  }
+}

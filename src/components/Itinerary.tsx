@@ -15,6 +15,7 @@ import type {
   TripPlan,
 } from "@/lib/plan";
 import { splitName } from "@/lib/humanize";
+import { usePlacePhoto } from "@/lib/usePlacePhoto";
 import {
   Btn,
   Card,
@@ -178,6 +179,33 @@ function steps(body?: string): Step[] {
     });
 }
 
+/**
+ * What to ask Google for, for a given day.
+ *
+ * Asking for the city alone gives every day in a city the same photograph,
+ * which makes a nine-day plan look like one day repeated. The day's own title
+ * carries its subject — "Old Town, slowly", "Arrive, settle in" — so the
+ * subject is lifted out and paired with the place: "Old Town Zurich".
+ *
+ * The date prefix and anything after a comma are dropped, because "slowly" and
+ * "Tue 12 Oct" are not places. A title that survives to nothing falls back to
+ * the city, which is still better than no photograph.
+ */
+function placeQuery(d: DayRow, cityName?: string | null): string | null {
+  const city = cityName ?? d.place ?? null;
+  if (!city) return null;
+  const subject = d.t
+    .replace(/^[^·]*·\s*/, "")  // "Tue 12 Oct · " 
+    .split(",")[0]!              // "Old Town, slowly" -> "Old Town"
+    .replace(/\b(arrive|settle in|depart|fly home|rest|free|slowly|at leisure)\b/gi, "")
+    .replace(/[^\p{L}\p{N}\s'-]/gu, " ")
+    .trim();
+  // Two words or more is a landmark worth asking for; one is usually a verb.
+  return subject.split(/\s+/).filter(Boolean).length >= 2
+    ? `${subject} ${city}`
+    : city;
+}
+
 function DayStory({
   d,
   index,
@@ -190,20 +218,34 @@ function DayStory({
   place?: string | null;
 }) {
   const list = steps(d.d);
+  /*
+   * A photograph of where the day actually is, when we can get one.
+   *
+   * The query is the day's own place when the plan names one, and the city
+   * otherwise. It is fetched after paint and never awaited: the card draws
+   * immediately on the house's photography and upgrades in place if Google
+   * answers. Google's attribution is shown whenever its picture is used,
+   * because that is the condition of using it.
+   */
+  const photo = usePlacePhoto(placeQuery(d, place));
+  const src = photo?.url ?? image;
   return (
     <article className="k-card overflow-hidden" style={{ borderRadius: 22 }}>
-      {image ? (
+      {src ? (
         <Photo
-          src={image}
-          alt={place ?? d.t}
+          src={src}
+          alt={photo?.placeName ?? place ?? d.t}
           radius={0}
           className="h-[168px] w-full"
         >
-          {/* The city, captioned: a city photograph never stands for the day's rooms. */}
+          {/* The place, captioned: a city photograph never stands for the day's rooms. */}
           {place ? (
             <GlassChip className="absolute bottom-3 left-3" icon="pin">
               {place}
             </GlassChip>
+          ) : null}
+          {photo ? (
+            <span className="it-credit absolute bottom-3 right-3">{photo.attribution}</span>
           ) : null}
         </Photo>
       ) : null}

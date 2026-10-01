@@ -441,3 +441,19 @@
   border: 1px solid var(--line);
   color: var(--ivory-2);
 }
+
+/* Google requires its photographers to be credited wherever their picture is
+   shown. Quiet, but never absent when their image is in use. */
+.it-credit {
+  font-family: var(--f-sans);
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, .72);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .9);
+  max-width: 48%;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
