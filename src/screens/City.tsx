@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Screen, TopBar, Dock } from '@/components/Shell'
-import { Photo, GlassChip, Cred, Card, Btn, Chip, Clamp, Disclosure, Icon, Empty } from '@/components/ui'
-import { MONTHS } from '@/data/catalogue.generated'
+import { Photo, GlassChip, Cred, Card, Btn, Chip, Clamp, Disclosure, Icon } from '@/components/ui'
+import { DestinationFallback } from '@/screens/DestinationFallback'
+import { MONTHS, CITY_BY_SLUG } from '@/data/catalogue.generated'
 import {
   PANEL_LABELS,
   cityHero,
@@ -98,6 +99,7 @@ export default function City() {
 
   const [city, setCity] = useState<CityDetail | null>(null)
   const [error, setError] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   const [panel, setPanel] = useState<PanelKey>('stay')
   const [tierIndex, setTierIndex] = useState(0)
   const [day, setDay] = useState(0)
@@ -110,6 +112,10 @@ export default function City() {
     setError(false)
     setPanel('stay')
     setTierIndex(0)
+    if (!CITY_BY_SLUG[slug]) {
+      setError(true)
+      return
+    }
     loadCity(slug)
       .then((c) => {
         if (cancelled) return
@@ -120,7 +126,7 @@ export default function City() {
     return () => {
       cancelled = true
     }
-  }, [slug, setActiveCity])
+  }, [slug, setActiveCity, attempt])
 
   const current = useMemo(
     () => city?.guide.panels.find((p) => p.key === panel) ?? null,
@@ -130,20 +136,7 @@ export default function City() {
   const shown = expanded ? tier?.items ?? [] : (tier?.items ?? []).slice(0, 6)
 
   if (error) {
-    return (
-      <Screen tone="light">
-        <Empty
-          icon="compass"
-          title="No guide on file."
-          body="This destination has not been written up yet. The Desk can still open it on request."
-          action={
-            <Btn tone="secondary" onClick={() => navigate('/')}>
-              Back to Discover
-            </Btn>
-          }
-        />
-      </Screen>
-    )
+    return <DestinationFallback destination={slug} unavailable={Boolean(CITY_BY_SLUG[slug])} onRetry={CITY_BY_SLUG[slug] ? () => setAttempt(n => n + 1) : undefined} />
   }
 
   if (!city) {

@@ -74,6 +74,12 @@ export function SearchOverlay({
     onPick(c.slug)
   }
 
+  function exploreDestination() {
+    remember(q)
+    onClose()
+    navigate(`/destinations?q=${encodeURIComponent(q.trim())}`)
+  }
+
   function askConcierge() {
     remember(q)
     onClose()
@@ -103,7 +109,9 @@ export function SearchOverlay({
             enterKeyHint="search"
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && results.length > 0) pick(results[0])
+              if (e.key !== 'Enter' || !term) return
+              if (results.length > 0) pick(results[0])
+              else exploreDestination()
             }}
             placeholder="Where would you like to be?"
             style={{ caretColor: 'var(--champagne)' }}
@@ -173,9 +181,10 @@ export function SearchOverlay({
             )}
 
             {results.length === 0 && (
-              <p className="t-body-s c-ivory-2 px-6 pb-6">
-                Not one of the {CITIES.length} we have guides for. Tara can still open it.
-              </p>
+              <div className="flex flex-col gap-3 px-6 pb-6">
+                <p className="t-body-s c-ivory-2">No published guide matches this search yet.</p>
+                <button type="button" className="k-btn k-btn-secondary" onClick={exploreDestination}>Explore &ldquo;{q.trim()}&rdquo;</button>
+              </div>
             )}
 
             {/* Never a dead end. */}
@@ -198,7 +207,7 @@ export function SearchOverlay({
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="t-title-s truncate">Ask Tara about &ldquo;{q.trim()}&rdquo;</span>
-                  <span className="t-caption">It can open anywhere, not only the {CITIES.length} we cover</span>
+                  <span className="t-caption">Plan beyond our published guides</span>
                 </span>
                 <Icon name="chevron-right" size={18} className="c-ivory-3" />
               </button>

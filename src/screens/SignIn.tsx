@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Btn, Icon, Mark, Photo, Seal, Wordmark } from '@/components/ui'
 import { useStore } from '@/context/store'
 import { brandImage } from '@/lib/catalogue'
@@ -20,6 +20,7 @@ function greeting(hour: number) {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn, prefs, wishlist, itinerary, requests } = useStore()
 
   const [step, setStep] = useState<Step>('code')
@@ -64,7 +65,9 @@ export default function SignIn() {
   function enter() {
     if (!resolved) return
     signIn(resolved)
-    navigate(prefs.completed ? '/' : '/onboarding', { replace: true })
+    const from = (location.state as { from?: unknown } | null)?.from
+    const destination = typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !['/signin', '/onboarding'].includes(from) ? from : null
+    navigate(destination ?? (prefs.completed ? '/' : '/onboarding'), { replace: true })
   }
 
   /* ------------------------------------------------------------- the door -- */
@@ -112,9 +115,9 @@ export default function SignIn() {
 
               {/* The cells are the picture of the field; one real input sits over them. */}
               <div className="relative" style={{ height: 54 }}>
-                <div aria-hidden="true" className="flex h-[54px] items-center justify-center" style={{ gap: 20 }}>
+                <div aria-hidden="true" className="flex h-[54px] items-center justify-center" style={{ gap: 'clamp(8px, 3vw, 20px)' }}>
                   {GROUPS.map((n, gi) => (
-                    <span key={gi} className="flex" style={{ gap: 5 }}>
+                    <span key={gi} className="flex min-w-0" style={{ gap: 5, flex: n }}>
                       {Array.from({ length: n }, () => {
                         const i = cell++
                         const char = clean[i]
@@ -124,7 +127,9 @@ export default function SignIn() {
                             key={i}
                             className="relative flex items-center justify-center"
                             style={{
-                              width: 34,
+                              flex: '1 1 0',
+                              minWidth: 0,
+                              maxWidth: 34,
                               height: 54,
                               borderRadius: 12,
                               background: active ? 'rgba(242,237,228,.09)' : 'rgba(242,237,228,.06)',

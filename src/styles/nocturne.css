@@ -493,6 +493,9 @@
    with cream type rather than bronze with ink. */
 .k-light .k-btn-primary { background: var(--ivory); color: #FBF8F3; }
 .k-light .k-btn-commit  { background: var(--champagne); color: #FBF8F3; }
+/* Floating dark docks keep dark text on their light primary actions. */
+.k-light .k-dark .k-btn-primary,
+.k-light .k-dark .k-btn-commit { color: var(--ink-0); }
 .k-light .k-chip.is-on  { background: var(--ivory); color: #FBF8F3; border-color: var(--ivory); }
 .k-light .k-badge       { background: var(--champagne); color: #FBF8F3; }
 

@@ -1,30 +1,20 @@
 import { useEffect, useState } from 'react'
 
-/**
- * What Tara says while she is thinking and no tool has named itself yet.
- *
- * A bare progress bar for ninety seconds reads as a hang. These lines are the
- * language of the work — a desk consulting maps, seasons and timetables — and
- * they rotate so the screen is visibly alive.
- *
- * They are deliberately vague about *what* is being weighed, because at this
- * point nothing has been decided and claiming otherwise would be a small lie
- * told very often. The moment a tool runs, its own honest label takes over.
- */
+/** Travel interludes, not claims about tools or bookings in progress. */
 const WORDS = [
-  'Thinking it through',
-  'Consulting the map',
-  'Weighing the routes',
-  'Checking the season',
-  'Reading the guides',
-  'Pacing out the days',
-  'Turning it over',
-  'Looking at the calendar',
-  'Finding the thread',
-  'Considering the detour',
+  'A little room for discovery',
+  'Every good journey starts with a little curiosity',
+  'The best days leave room for a detour',
+  'Somewhere between a quiet coast and a lively city',
+  'Slow mornings. Unhurried evenings.',
+  'A new view, a different pace',
+  'A change of scenery can change the whole day',
+  'From the first hello to the last sunset',
+  'A table worth lingering at. A street worth wandering.',
+  'Good journeys leave a little room for surprise',
 ]
 
-const EVERY_MS = 2600
+const EVERY_MS = 4500
 
 /**
  * Cycles while `active`, settling back to the first line when it stops. The
