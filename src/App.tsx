@@ -28,7 +28,6 @@ import Services from '@/screens/Services'
 import ServiceHotels from '@/screens/ServiceHotels'
 import ServiceEnquiry from '@/screens/ServiceEnquiry'
 import Handover from '@/screens/Handover'
-import PlanPage from '@/screens/PlanPage'
 import Legal from '@/screens/Legal'
 
 function RequireMember({ children }: { children: ReactElement }) {
@@ -78,7 +77,6 @@ export default function App() {
           ['/services', <Services key="se" />],
           ['/services/hotels', <ServiceHotels key="sh" />],
           ['/services/:kind', <ServiceEnquiry key="sq" />],
-          ['/plan', <PlanPage key="pl" />],
           ['/handover', <Handover key="ho" />],
         ] as [string, ReactElement][]
       ).map(([path, element]) => (

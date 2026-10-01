@@ -443,16 +443,6 @@ export async function fetchHotelRates(q: { city: string; checkIn: string; checkO
   }
 }
 
-/** Turn a plan URL from the backend into one this app can open. */
-export function proxiedPlanUrl(url: string): string {
-  try {
-    const parsed = new URL(url)
-    return `${BASE}${parsed.pathname}${parsed.search}`
-  } catch {
-    return url
-  }
-}
-
 /* --------------------------------------------------------- asking to join --- */
 
 /**
