@@ -831,6 +831,8 @@ export function PhotoCarousel({
              their own time, and the next one is wanted before it is shown. */
           loading={i === 0 ? 'eager' : 'lazy'}
           fetchPriority={i === 0 ? 'high' : 'low'}
+          /* The splash lifts when this one has arrived. */
+          data-hero={i === 0 ? 'true' : undefined}
           decoding="async"
           className={`absolute inset-0 h-full w-full object-cover ${i === index && !reduced ? 'kenburns' : ''}`}
           style={{
