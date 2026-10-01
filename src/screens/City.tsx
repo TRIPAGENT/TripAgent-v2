@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Screen, TopBar, Dock } from '@/components/Shell'
-import { Photo, GlassChip, Cred, Card, Btn, Chip, Clamp, Disclosure, Icon, Empty } from '@/components/ui'
-import { MONTHS } from '@/data/catalogue.generated'
+import { Photo, GlassChip, Cred, Card, Btn, Chip, Clamp, Disclosure, Icon, Sig } from '@/components/ui'
+import { CITIES, MONTHS } from '@/data/catalogue.generated'
 import {
   PANEL_LABELS,
   cityHero,
@@ -11,6 +11,7 @@ import {
   type MonthTier,
   type PanelKey,
   type Row,
+  type CitySummary,
 } from '@/lib/catalogue'
 import { LiveRates } from '@/components/LiveRates'
 import { savedCityKey, savedItemKey } from '@/lib/itinerary'
@@ -91,6 +92,123 @@ function FactRows({ rows, note }: { rows: Row[]; note?: string | null }) {
   )
 }
 
+/**
+ * A destination we have not written up.
+ *
+ * The old version of this was a dead end: a sentence and a button back to
+ * Discover. But not having a guide is not the same as not being able to help —
+ * Tara can research anywhere, so the one thing this screen must do is offer
+ * that, and offer it as the main action rather than a footnote.
+ *
+ * Above it, anything close we *do* have, because a member who typed "como" and
+ * meant Lake Como should not have to guess our spelling.
+ */
+function NoGuide({ slug }: { slug: string }) {
+  const navigate = useNavigate()
+  const { setActiveCity } = useStore()
+  const asked = humaniseSlug(slug)
+  const near = useMemo(() => nearestCities(slug), [slug])
+
+  return (
+    <Screen tone="light" tabs={false}>
+      <TopBar back="/" solid title="Destination" />
+      <section className="flex flex-col gap-4 px-6" style={{ paddingTop: 108 }}>
+        <h1 className="t-display-l">
+          No guide for <Sig>{asked}</Sig> yet.
+        </h1>
+        <p className="t-body c-ivory-2 max-w-quote">
+          We write these ourselves, city by city, and have not reached this one. That does not
+          mean we cannot plan it — Tara can research it with you now, and the Desk books it the
+          same way as anywhere else.
+        </p>
+      </section>
+
+      {near.length > 0 ? (
+        <section className="flex flex-col gap-4 px-6 pt-10">
+          <h2 className="t-display-s">Did you mean one of these?</h2>
+          <Card className="px-4">
+            {near.map((c) => (
+              <button
+                key={c.slug}
+                type="button"
+                className="k-row w-full py-3.5 text-left"
+                onClick={() => {
+                  setActiveCity(c.slug)
+                  navigate(`/city/${c.slug}`, { replace: true })
+                }}
+              >
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="t-title-s truncate">{c.name}</span>
+                  {c.country ? <span className="t-caption truncate">{c.country}</span> : null}
+                </span>
+                <Icon name="chevron-right" size={18} className="c-ivory-3 shrink-0" />
+              </button>
+            ))}
+          </Card>
+        </section>
+      ) : null}
+
+      <section className="flex flex-col gap-3 px-6 pt-10">
+        <Btn
+          tone="primary"
+          block
+          icon="horizon"
+          onClick={() =>
+            navigate('/concierge', {
+              state: { query: `I would like to go to ${asked}. What should I know, and when is best?` },
+            })
+          }
+        >
+          Ask Tara about {asked}
+        </Btn>
+        <Btn tone="ghost" block onClick={() => navigate('/map')}>
+          See everywhere we cover
+        </Btn>
+        <p className="t-caption c-ivory-3 pt-1 text-center">
+          {CITIES.length} destinations have a written guide. Tara is not limited to them.
+        </p>
+      </section>
+    </Screen>
+  )
+}
+
+/** "lake-como" → "Lake Como". Only for showing back what someone asked for. */
+function humaniseSlug(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ')
+}
+
+/**
+ * The closest guides we actually have.
+ *
+ * Scored on shared words with the name or country, then on a shared opening —
+ * enough to catch a misspelling or a half-remembered name without pretending to
+ * be a search engine. Nothing weak is offered: a bad suggestion is worse than
+ * none, because it sends a member somewhere they did not ask for.
+ */
+function nearestCities(slug: string): CitySummary[] {
+  const asked = slug.toLowerCase().split('-').filter(Boolean)
+  if (!asked.length) return []
+  const scored = CITIES.map((c) => {
+    const hay = `${c.slug} ${c.name} ${c.country ?? ''} ${c.region ?? ''}`.toLowerCase()
+    let score = 0
+    for (const w of asked) {
+      if (w.length < 3) continue
+      if (hay.includes(w)) score += 3
+      else if (hay.split(/[\s-]+/).some((h) => h.startsWith(w.slice(0, 4)))) score += 1
+    }
+    return { c, score }
+  })
+  return scored
+    .filter((x) => x.score >= 3)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4)
+    .map((x) => x.c)
+}
+
 export default function City() {
   const { slug = '' } = useParams()
   const navigate = useNavigate()
@@ -129,22 +247,7 @@ export default function City() {
   const tier = current?.tiers[tierIndex] ?? null
   const shown = expanded ? tier?.items ?? [] : (tier?.items ?? []).slice(0, 6)
 
-  if (error) {
-    return (
-      <Screen tone="light">
-        <Empty
-          icon="compass"
-          title="No guide on file."
-          body="This destination has not been written up yet. The Desk can still open it on request."
-          action={
-            <Btn tone="secondary" onClick={() => navigate('/')}>
-              Back to Discover
-            </Btn>
-          }
-        />
-      </Screen>
-    )
-  }
+  if (error) return <NoGuide slug={slug} />
 
   if (!city) {
     return (
