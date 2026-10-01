@@ -9,6 +9,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { Icon } from './icons'
+import { Mark } from './ui'
 import { useStore } from '@/context/store'
 
 const TABS = [
@@ -60,7 +61,9 @@ export function TabBar() {
         className="k-orb"
         style={conciergeOn ? { boxShadow: 'var(--shadow-orb), 0 0 0 2px rgba(216,194,154,.55)' } : undefined}
       >
-        <Icon name="horizon" size={26} strokeWidth={1.6} />
+        {/* The house mark, not Tara's sunrise: this is the most prominent
+            thing in the app and it should be the brand. */}
+        <Mark size={25} strokeWidth={30} />
       </NavLink>
 
       <NavLink to={TABS[2].to} className={tabClass}>

@@ -94,16 +94,26 @@ const SERVICE_LINE: Record<string, string> = {
 /**
  * The home hero, as four pictures rather than one.
  *
- * Chosen to say four different things about where a member might go — a city
- * room, water, a great house, and India — so the screen reads as a house with
- * range rather than a single mood. The first is the one that loads on arrival,
- * so it stays the strongest.
+ * Four different things about where a member might go — a city room, a coast,
+ * a lagoon, a hotel on the water — so the screen reads as a house with range
+ * rather than a single mood. The first is the one that loads on arrival, so it
+ * stays the strongest.
+ *
+ * No photograph here has a person as its subject. A face dates a picture, fixes
+ * who the trip is for, and quietly excludes everyone who does not look like
+ * them; an empty room invites the member into it instead.
  */
 const HERO_SLIDES = [
   { src: brandImage('home'), alt: 'A suite at dusk, the city beyond the window' },
-  { src: brandImage('sanctuary'), alt: 'An infinity pool facing limestone islands' },
-  { src: brandImage('grand-house'), alt: 'A palace-hotel staircase above a marble floor' },
-  { src: brandImage('udaipur'), alt: 'A lake palace at golden hour' },
+  { src: brandImage('hero-4'), alt: 'A cliff town above the sea at first light' },
+  { src: brandImage('maldives'), alt: 'Overwater villas on a turquoise lagoon' },
+  {
+    src: brandImage('lake-como'),
+    alt: 'A lit waterside hotel at dusk',
+    // Landscape source in a tall frame: hold the building and the water rather
+    // than the empty sky above them.
+    position: 'center 62%',
+  },
 ]
 
 /* ------------------------------------------------------------------ screen - */
