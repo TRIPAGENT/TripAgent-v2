@@ -773,3 +773,111 @@ export function Disclosure({
     </div>
   )
 }
+
+/**
+ * The home hero: photography that changes, over content that does not.
+ *
+ * Only the picture crossfades. The greeting, the header and whatever the Desk
+ * is holding stay exactly where they are, because a member reaching for the
+ * composer should never have it move under their thumb.
+ *
+ * Auto-advance stops entirely under `prefers-reduced-motion`, when the tab is
+ * hidden (an unseen carousel is just wasted battery), and as soon as someone
+ * picks a slide themselves — at that point they are driving, not watching.
+ */
+export function PhotoCarousel({
+  slides,
+  interval = 6500,
+  className = '',
+  style,
+  children,
+}: {
+  slides: { src: string; alt: string; position?: string }[]
+  interval?: number
+  className?: string
+  style?: CSSProperties
+  children?: ReactNode
+}) {
+  const [index, setIndex] = useState(0)
+  const [taken, setTaken] = useState(false)
+  const reduced = usePrefersReducedMotion()
+
+  useEffect(() => {
+    if (reduced || taken || slides.length < 2) return
+    let timer: number | undefined
+    const tick = () => setIndex((i) => (i + 1) % slides.length)
+    const start = () => {
+      window.clearInterval(timer)
+      timer = window.setInterval(tick, interval)
+    }
+    const onVisibility = () => (document.hidden ? window.clearInterval(timer) : start())
+    start()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [reduced, taken, slides.length, interval])
+
+  return (
+    <div className={`k-photo relative ${className}`} style={style}>
+      {slides.map((s, i) => (
+        <img
+          key={s.src}
+          src={s.src}
+          alt={i === index ? s.alt : ''}
+          aria-hidden={i === index ? undefined : true}
+          /* The first frame is what a member waits on; the rest can arrive in
+             their own time, and the next one is wanted before it is shown. */
+          loading={i === 0 ? 'eager' : 'lazy'}
+          fetchPriority={i === 0 ? 'high' : 'low'}
+          decoding="async"
+          className={`absolute inset-0 h-full w-full object-cover ${i === index && !reduced ? 'kenburns' : ''}`}
+          style={{
+            objectPosition: s.position,
+            opacity: i === index ? 1 : 0,
+            transition: reduced ? undefined : 'opacity 1.1s var(--ease-out)',
+          }}
+        />
+      ))}
+      <span className="k-veil-top" aria-hidden="true" />
+      <span className="k-veil-bottom" aria-hidden="true" />
+      {children}
+
+      {slides.length > 1 ? (
+        <div
+          className="absolute left-0 right-0 z-[6] flex items-center justify-center gap-2"
+          style={{ bottom: 14 }}
+        >
+          {slides.map((s, i) => (
+            <button
+              key={s.src}
+              type="button"
+              aria-label={`Show picture ${i + 1} of ${slides.length}`}
+              aria-current={i === index}
+              onClick={() => {
+                setIndex(i)
+                setTaken(true)
+              }}
+              className="k-carousel-dot"
+              data-on={i === index ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/** True when the member has asked their device for less movement. */
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const q = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReduced(q.matches)
+    const on = () => setReduced(q.matches)
+    q.addEventListener('change', on)
+    return () => q.removeEventListener('change', on)
+  }, [])
+  return reduced
+}

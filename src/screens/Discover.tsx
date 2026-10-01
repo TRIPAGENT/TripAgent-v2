@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
 import { SearchOverlay } from '@/components/SearchOverlay'
-import { Band, Chip, Icon, Photo, Rail, Section, SectionHead, Status, Track, Wordmark } from '@/components/ui'
+import { Band, Chip, Icon, Photo, PhotoCarousel, Rail, Section, SectionHead, Status, Track, Wordmark } from '@/components/ui'
 import { CITIES, CITY_BY_SLUG, MONTHS, SERVICES } from '@/data/catalogue.generated'
 import { brandImage, cityCard, cityHero } from '@/lib/catalogue'
 import type { CitySummary } from '@/lib/catalogue'
@@ -91,6 +91,21 @@ const SERVICE_LINE: Record<string, string> = {
   Visas: 'Checked, filed, tracked',
 }
 
+/**
+ * The home hero, as four pictures rather than one.
+ *
+ * Chosen to say four different things about where a member might go — a city
+ * room, water, a great house, and India — so the screen reads as a house with
+ * range rather than a single mood. The first is the one that loads on arrival,
+ * so it stays the strongest.
+ */
+const HERO_SLIDES = [
+  { src: brandImage('home'), alt: 'A suite at dusk, the city beyond the window' },
+  { src: brandImage('sanctuary'), alt: 'An infinity pool facing limestone islands' },
+  { src: brandImage('grand-house'), alt: 'A palace-hotel staircase above a marble floor' },
+  { src: brandImage('udaipur'), alt: 'A lake palace at golden hour' },
+]
+
 /* ------------------------------------------------------------------ screen - */
 
 export default function Discover() {
@@ -136,13 +151,8 @@ export default function Discover() {
   return (
     <Screen tone="light">
       {/* --------------------------------------------------------- the hero -- */}
-      <Photo
-        src={brandImage('home')}
-        alt="A suite in warm evening light"
-        veil="hero"
-        radius={0}
-        eager
-        kenburns
+      <PhotoCarousel
+        slides={HERO_SLIDES}
         className="h-[648px] max-h-[82svh] w-full"
       >
         <header
@@ -187,7 +197,7 @@ export default function Discover() {
 
           {current ? <LiveCard request={current} onOpen={() => navigate('/status')} /> : null}
         </div>
-      </Photo>
+      </PhotoCarousel>
 
       {/* --------------------------------------------------- Tara -- */}
       <section className="flex flex-col gap-3.5 pt-6">

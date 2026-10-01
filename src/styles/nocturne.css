@@ -613,3 +613,16 @@
   border-left: 2px solid var(--champagne-line);
   box-shadow: 0 1px 2px rgba(25, 22, 19, .04);
 }
+
+/* ---- Carousel dots ------------------------------------------------------
+   A 44px target around a 6px mark: the dot is the thing you see, not the
+   thing you have to hit. */
+.k-carousel-dot {
+  position: relative;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(242, 237, 228, .38);
+  transition: background .4s var(--ease-out), width .4s var(--ease-out);
+}
+.k-carousel-dot[data-on] { width: 22px; border-radius: 999px; background: var(--champagne); }
+.k-carousel-dot::before { content: ''; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+@media (prefers-reduced-motion: reduce) { .k-carousel-dot { transition: none; } }
