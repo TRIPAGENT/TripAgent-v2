@@ -104,7 +104,6 @@ const SERVICE_LINE: Record<string, string> = {
  * them; an empty room invites the member into it instead.
  */
 const HERO_SLIDES = [
-  { src: brandImage('home'), alt: 'A suite at dusk, the city beyond the window' },
   { src: brandImage('hero-4'), alt: 'A cliff town above the sea at first light' },
   { src: brandImage('maldives'), alt: 'Overwater villas on a turquoise lagoon' },
   {
@@ -163,7 +162,7 @@ export default function Discover() {
       {/* --------------------------------------------------------- the hero -- */}
       <PhotoCarousel
         slides={HERO_SLIDES}
-        className="h-[648px] max-h-[82svh] w-full"
+        className="h-[min(560px,68svh)] w-full"
       >
         <header
           className="absolute left-4 right-4 z-10 flex items-center justify-between gap-3"

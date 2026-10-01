@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
 import { AgentMark, Btn, Card, Horizon, Icon } from '@/components/ui'
 import { useStore, type Preferences } from '@/context/store'
+import { useThinkingWord } from '@/lib/useThinking'
 import { CITY_BY_SLUG } from '@/data/catalogue.generated'
 import { parseItemKey } from '@/lib/itinerary'
 import { greeting, msg, respond } from '@/lib/concierge'
@@ -162,6 +163,8 @@ export default function Concierge() {
   const [partial, setPartial] = useState('')
   /** What Tara is doing right now, when it is working rather than talking. */
   const [activity, setActivity] = useState<string | null>(null)
+  // Rotating language of the work, so a long build never reads as a hang.
+  const thinkingWord = useThinkingWord(thinking && !activity && !partial)
   /** Real seconds since this turn began, for the working card. */
   const [elapsed, setElapsed] = useState(0)
   const [listening, setListening] = useState(false)
@@ -731,8 +734,11 @@ export default function Concierge() {
                 />
               </p>
             ) : (
-              <span className="k-track relative block w-24" aria-label="Thinking">
-                <span className="k-sweep absolute inset-0" />
+              <span className="flex flex-col gap-2.5" aria-live="polite">
+                <span className="t-body-s c-ivory-2">{thinkingWord}…</span>
+                <span className="k-track relative block w-24" aria-label="Thinking">
+                  <span className="k-sweep absolute inset-0" />
+                </span>
               </span>
             )}
           </div>

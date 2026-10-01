@@ -18,6 +18,7 @@ import { splitName } from "@/lib/humanize";
 import { usePlacePhoto } from "@/lib/usePlacePhoto";
 import {
   Btn,
+  Disclosure,
   Card,
   Cred,
   GlassChip,
@@ -786,11 +787,28 @@ function Decisions({ rows }: { rows: Row[] }) {
 
 /* ---------------------------------------------------- agent 0.2.1 pieces --- */
 
+/** What is actually open, said plainly at the top of the tab. */
+function openCount(p: TripPlan): string {
+  const yours = (p.bookingActions ?? []).filter((a) => a.status === "your-choice").length;
+  const desk = (p.bookingActions ?? []).filter((a) => a.status === "with-advisor").length;
+  const parts: string[] = [];
+  if (yours) parts.push(`${yours} for you`);
+  if (desk) parts.push(`${desk} with the Desk`);
+  if (!parts.length) return "Nothing is booked until you say so.";
+  return `${parts.join(" \u00b7 ")}. Nothing is booked until you say so.`;
+}
+
 /** A champagne-bulleted list. The house's one list shape. */
-function Points({ points }: { points: string[] }) {
+function Points({ points, max }: { points: string[]; max?: number }) {
+  const [all, setAll] = useState(false);
+  /* Eight bullets of visa detail is reference, not a decision. The first few
+     carry the action; the rest are there when someone wants them. */
+  const shown = max && !all ? points.slice(0, max) : points;
+  const hidden = points.length - shown.length;
   return (
+    <>
     <ul className="flex flex-col gap-2">
-      {points.map((b, i) => (
+      {shown.map((b, i) => (
         <li key={`${b}-${i}`} className="flex items-start gap-2.5">
           <span
             aria-hidden="true"
@@ -801,6 +819,13 @@ function Points({ points }: { points: string[] }) {
         </li>
       ))}
     </ul>
+    {hidden > 0 ? (
+      <button type="button" onClick={() => setAll(true)} className="k-link k-link-champagne self-start">
+        {hidden} more {hidden === 1 ? "detail" : "details"}
+        <Icon name="chevron-down" size={15} />
+      </button>
+    ) : null}
+    </>
   );
 }
 
@@ -832,7 +857,7 @@ function Sources({ links }: { links: { t: string; u: string }[] }) {
  * sources were actually checked. `checked` is never printed as anything other
  * than what it is — a source-check, not a guarantee about the future.
  */
-function GuidanceCard({ note, icon }: { note: Guidance; icon?: string }) {
+function GuidanceCard({ note, icon, max }: { note: Guidance; icon?: string; max?: number }) {
   return (
     <Card className="flex flex-col gap-3.5 p-[18px]">
       <div className="flex items-center gap-3">
@@ -843,7 +868,7 @@ function GuidanceCard({ note, icon }: { note: Guidance; icon?: string }) {
         ) : null}
         <h3 className="t-title-s">{note.title}</h3>
       </div>
-      <Points points={note.points} />
+      <Points points={note.points} max={max} />
       <Sources links={note.sources} />
       {note.checked ? <p className="t-caption c-ivory-3">Sources checked {note.checked}</p> : null}
     </Card>
@@ -1382,7 +1407,7 @@ export function Itinerary({
               ) : null}
 
               {p.visaGuidance ? (
-                <GuidanceCard note={p.visaGuidance} icon="passport" />
+                <GuidanceCard note={p.visaGuidance} icon="passport" max={3} />
               ) : p.gate?.t || p.gate?.b ? (
                 <aside className="it-gate flex flex-col gap-3.5 p-[18px]">
                   <div className="flex items-center gap-3">
@@ -1409,7 +1434,10 @@ export function Itinerary({
 
           {p.bookingActions?.length || p.decisions.length ? (
             <section className="flex flex-col gap-5 px-6 pt-14">
-              <h2 className="t-display-s">Still to settle</h2>
+              <div className="flex flex-col gap-1.5">
+                <h2 className="t-display-s">Still to settle</h2>
+                <p className="t-caption">{openCount(p)}</p>
+              </div>
               {p.bookingActions?.length ? (
                 <div className="flex flex-col gap-3">
                   {p.bookingActions.map((a, i) => (
@@ -1429,37 +1457,26 @@ export function Itinerary({
           )}
 
           {p.destinationNotes?.length ? (
-            <section className="flex flex-col gap-5 px-6 pt-14">
-              <div className="flex flex-col gap-1.5">
-                <p className="k-eyebrow">For the journey</p>
-                <h2 className="t-display-s">A little more about where you are going</h2>
-                <p className="t-caption">Reading for when you feel like it. Nothing here needs a decision.</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                {p.destinationNotes.map((n, i) => (
-                  <div key={`${n.title}-${i}`} className="flex flex-col gap-2">
-                    <p className="t-label c-ivory-3">{TOPIC_LABEL[n.topic]}</p>
-                    <GuidanceCard note={n} icon={TOPIC_ICON[n.topic]} />
-                  </div>
-                ))}
-              </div>
+            <section className="flex flex-col gap-2 px-6 pt-12">
+              <p className="k-eyebrow">For the journey</p>
+              {p.destinationNotes.map((n, i) => (
+                <Disclosure
+                  key={`${n.title}-${i}`}
+                  title={n.title}
+                  caption={TOPIC_LABEL[n.topic]}
+                  icon={TOPIC_ICON[n.topic]}
+                >
+                  <GuidanceCard note={n} />
+                </Disclosure>
+              ))}
             </section>
           ) : null}
 
           {p.why.length > 0 ? (
-            <section className="flex flex-col gap-5 px-6 pt-14">
-              <h2 className="t-display-s">Why this shape</h2>
-              <ul className="flex flex-col gap-3">
-                {p.why.map((w) => (
-                  <li key={w} className="flex items-start gap-2.5">
-                    <span
-                      className="c-champagne mt-1.5 h-1 w-1 shrink-0 rounded-full"
-                      style={{ background: "var(--champagne)" }}
-                    />
-                    <span className="t-body-s c-ivory-2">{w}</span>
-                  </li>
-                ))}
-              </ul>
+            <section className="px-6 pt-2">
+              <Disclosure title="Why this shape" icon="info">
+                <Points points={p.why} />
+              </Disclosure>
             </section>
           ) : null}
 

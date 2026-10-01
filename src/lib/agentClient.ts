@@ -193,18 +193,24 @@ export type StreamEvent =
   | { type: 'done'; messages: string[]; cost?: number }
   | { type: 'error'; message: string }
 
-/** What each tool is called while the traveller is waiting on it. */
+/**
+ * What each tool is called while the traveller is waiting on it.
+ *
+ * Said the way a person at a desk would say it, not the way the system works.
+ * Each one still describes what is actually happening — a member waiting two
+ * minutes deserves to know it is reading sources rather than inventing.
+ */
 const TOOL_LABELS: Record<string, string> = {
-  build_trip_plan: 'Building your plan',
-  build_comparison: 'Comparing your options',
-  get_plan: 'Reading your plan',
-  web_search: 'Searching',
-  read_page: 'Reading a source',
-  search_memory: 'Checking what we know',
-  read_memory: 'Checking what we know',
-  memory_history: 'Checking what we know',
+  build_trip_plan: 'Drawing out the days',
+  build_comparison: 'Laying them side by side',
+  get_plan: 'Opening your itinerary',
+  web_search: 'Looking it up',
+  read_page: 'Reading the source',
+  search_memory: 'Checking your file',
+  read_memory: 'Checking your file',
+  memory_history: 'Looking back through your file',
   todo_add: 'Noting that down',
-  todo_list: 'Checking open loops',
+  todo_list: 'Checking what is still open',
   todo_done: 'Closing that off',
 }
 
