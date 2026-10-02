@@ -192,6 +192,7 @@ export function Screen({
   tabs = true,
   dock = false,
   tone = 'dark',
+  wide = false,
   className = '',
 }: {
   children: ReactNode
@@ -204,12 +205,13 @@ export function Screen({
    * obsidian register either way, so a light screen still has a dark hero.
    */
   tone?: 'dark' | 'light'
+  wide?: boolean
   className?: string
 }) {
   const { pathname } = useLocation()
   return (
     <div
-      className={`mx-auto min-h-full w-full max-w-app ${tone === 'light' ? 'k-light' : ''}`}
+      className={`mx-auto min-h-full w-full ${wide ? 'max-w-[1000px]' : 'max-w-app'} ${tone === 'light' ? 'k-light' : ''}`}
       style={{ background: 'var(--ink-0)' }}
     >
       <main key={pathname} className={`page-in relative ${className}`} style={{ paddingBottom: tabs || dock ? 132 : 0 }}>

@@ -191,7 +191,7 @@ export default function Journeys() {
   const shown = shelves[segment]
   const seg: { id: Segment; label: string; count: number }[] = [
     { id: 'upcoming', label: 'Upcoming', count: shelves.upcoming.length },
-    { id: 'shaping', label: 'Being shaped', count: shelves.shaping.length },
+    { id: 'shaping', label: 'Your plans', count: shelves.shaping.length },
     { id: 'past', label: 'Past', count: shelves.past.length },
   ]
 
@@ -263,7 +263,7 @@ export default function Journeys() {
           const state = req ? STATUS[req.status] : null
 
           return (
-            <article key={t.key} className="k-photo relative" style={{ borderRadius: 24, height: big ? 440 : 168 }}>
+            <article key={t.key} className="k-photo relative" style={{ borderRadius: 24, minHeight: big ? 440 : 208 }}>
               <Photo
                 src={slug ? (big ? cityHero(slug) : cityCard(slug)) : undefined}
                 alt={slug ? CITY_BY_SLUG[slug]?.name ?? t.title : t.title}
@@ -285,7 +285,7 @@ export default function Journeys() {
                 </span>
               ) : (
                 <span className="absolute left-4 top-4 z-[2]">
-                  <Status tone="progress">Draft · shaping</Status>
+                  <Status tone="progress">Ready to review</Status>
                 </span>
               )}
               {req ? (
@@ -339,11 +339,9 @@ export default function Journeys() {
                       <span className="c-champagne">
                         <Icon name="horizon" size={16} />
                       </span>
-                      Tara is shaping this
+                      Open your itinerary
                     </span>
-                    <span className="k-track block">
-                      <i className="k-sweep block h-full w-full" aria-hidden="true" />
-                    </span>
+
                   </div>
                 ) : null}
               </div>

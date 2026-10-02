@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Screen, TopBar, Dock } from '@/components/Shell'
 import { Btn, Empty, Icon, Status } from '@/components/ui'
 import { Itinerary } from '@/components/Itinerary'
@@ -165,17 +165,11 @@ export default function ItineraryScreen() {
   }
 
   return (
-    <Screen tone="light" tabs={false} dock>
-      <TopBar
-        back="/journeys"
-        actions={
-          <button type="button" aria-label="Share this itinerary" className="k-icon-btn" onClick={share}>
-            <Icon name="share" size={20} />
-          </button>
-        }
-      />
+    <Screen tone="light" tabs={false} dock wide>
+      <nav className="pv-app-nav" style={{ maxWidth: 900, margin: '0 auto', padding: '16px 24px 0' }}><Link to="/journeys" className="pv-back">← Your journeys</Link></nav>
 
       <Itinerary
+        key={bundle.key}
         bundle={bundle as PlanBundle & { plan: TripPlan }}
         madeFor={member?.name}
         coming={coming}
