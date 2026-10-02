@@ -528,3 +528,22 @@ async function jobRequest(path: string, body?: { message: string; requestId: str
 }
 export const currentChatJob = () => jobRequest('/api/chat/jobs/current')
 export const submitChatJob = (message: string, requestId: string) => jobRequest('/api/chat/jobs', { message, requestId })
+
+export interface AccountState {
+  prefs: import('@/context/store').Preferences
+  wishlist: string[]
+  itinerary: string[]
+  activeCity: string
+  components: import('./types').BookingComponent[]
+  plan: { url: string; title: string; at: number } | null
+  booking: { key: string; planId: string; title: string } | null
+  choices: Record<string, Record<string, number>>
+}
+export const fetchAccountState = () => getJson<{ state: Partial<AccountState> }>(`${BASE}/api/member-state`).then(r => r.state)
+export const saveAccountState = (patch: Partial<AccountState>) => postJson(`${BASE}/api/member-state`, patch)
+export async function fetchChatHistory(): Promise<ChatMessage[]> {
+  const { messages } = await getJson<{ messages: { id: string; role: string; content: string; at?: number; parts?: string[] }[] }>(`${BASE}/api/history`)
+  return messages.flatMap(m => m.role === 'user'
+    ? [msg('member', m.content, { id: m.id, at: m.at ?? 0 })]
+    : m.role === 'assistant' ? toChatMessages(m.parts ?? [m.content]).map((reply, i) => ({ ...reply, id: `${m.id}-${i}`, at: m.at ?? 0 })) : [])
+}

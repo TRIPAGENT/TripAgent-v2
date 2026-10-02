@@ -20,7 +20,7 @@ export function save<T>(key: string, value: T): void {
 export function clearAll(): void {
   try {
     Object.keys(localStorage)
-      .filter((k) => k.startsWith(PREFIX))
+      .filter((k) => k.startsWith(PREFIX) && !k.startsWith(PREFIX + 'account:'))
       .forEach((k) => localStorage.removeItem(k))
   } catch {
     /* ignore */

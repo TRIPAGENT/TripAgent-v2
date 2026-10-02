@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useStore } from '@/context/store';
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import "@/styles/itinerary.css";
 import { CITY_BY_SLUG } from "@/data/catalogue.generated";
 import { cityCard, cityHero } from "@/lib/catalogue";
@@ -986,28 +987,15 @@ export function Itinerary({
   const [day, setDay] = useState<string>("all");
   const top = useRef<HTMLDivElement>(null);
 
-  // Swaps are the member's own, remembered per plan on this device.
-  const storeKey = `tripagent:choices:${bundle.key}`;
-  const [choices, setChoices] = useState<Record<string, number>>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(storeKey) ?? "{}") as Record<
-        string,
-        number
-      >;
-    } catch {
-      return {};
-    }
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem(storeKey, JSON.stringify(choices));
-    } catch {
-      /* private mode: swaps simply do not persist */
-    }
-  }, [choices, storeKey]);
-
-  const choose = (id: string, i: number) =>
-    setChoices((c) => ({ ...c, [id]: i }));
+  const { choices: saved, setChoices } = useStore();
+  const [previewChoices, setPreviewChoices] = useState<Record<string, number>>({});
+  const isSavedPlan = /^[a-f0-9]{64}$/.test(bundle.key);
+  const choices = isSavedPlan ? saved[bundle.key] ?? {} : previewChoices;
+  const choose = (id: string, i: number) => {
+    const next = { ...choices, [id]: i };
+    if (isSavedPlan) setChoices(bundle.key, next);
+    else setPreviewChoices(next);
+  };
 
   const changed = useMemo(() => {
     const out: string[] = [];
