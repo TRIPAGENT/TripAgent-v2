@@ -4,29 +4,10 @@ import { Screen, TopBar } from '@/components/Shell'
 import { Icon, Photo } from '@/components/ui'
 import { SERVICES } from '@/data/catalogue.generated'
 import { brandImage } from '@/lib/catalogue'
+import { serviceFace } from '@/lib/services'
 
-const ROUTES: Record<string, string> = {
-  Flights: '/services/flights',
-  Hotels: '/services/hotels',
-  Visas: '/services/visas',
-}
-
-/** The catalogue says "Hotels"; the house says "Stays". */
-const NAME: Record<string, string> = { Hotels: 'Stays' }
-
-const EYEBROW: Record<string, string> = {
-  Flights: 'Business, first and suites',
-  Hotels: 'The room, not the listing',
-  Visas: 'Before money moves',
-}
-
-const ACTION: Record<string, string> = {
-  Flights: 'Tell us the journey',
-  Hotels: 'Find a room',
-  Visas: 'Start a visa',
-}
-
-const IMAGE: Record<string, string> = { Flights: 'cabin', Hotels: 'suite', Visas: 'visas' }
+/* The house's words for each counter live in one place; only the photograph's
+   description is particular to this screen. */
 
 const ALT: Record<string, string> = {
   Flights: 'A dark, hushed business-class cabin, light falling from an oval window',
@@ -75,37 +56,40 @@ export default function Services() {
       </section>
 
       <section aria-label="Services" className="flex flex-col gap-4 px-6 pt-10">
-        {SERVICES.map((s) => (
-          <Photo
-            key={s.heading}
-            src={brandImage(IMAGE[s.heading] ?? s.image ?? 'hero-1')}
-            alt={ALT[s.heading] ?? s.heading}
-            label={NAME[s.heading] ?? s.heading}
-            radius={24}
-            className="h-[300px] w-full"
-            style={{ boxShadow: 'var(--shadow-card)' }}
-          >
-            <button
-              type="button"
-              className="absolute inset-0 z-[1]"
-              aria-label={`${NAME[s.heading] ?? s.heading}: ${ACTION[s.heading] ?? 'Begin'}`}
-              onClick={() => navigate(ROUTES[s.heading] ?? '/desk')}
-            />
-            <div className="pointer-events-none absolute inset-x-5 bottom-5 z-[2] flex flex-col items-start gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col gap-1">
-                  <p className="t-caption">{EYEBROW[s.heading] ?? s.number}</p>
-                  <h2 className="t-display-m">{NAME[s.heading] ?? s.heading}</h2>
+        {SERVICES.map((s) => {
+          const face = serviceFace(s.heading, s.image)
+          return (
+            <Photo
+              key={s.heading}
+              src={brandImage(face.image)}
+              alt={ALT[s.heading] ?? face.name}
+              label={face.name}
+              radius={24}
+              className="h-[300px] w-full"
+              style={{ boxShadow: 'var(--shadow-card)' }}
+            >
+              <button
+                type="button"
+                className="absolute inset-0 z-[1]"
+                aria-label={`${face.name}: ${face.action}`}
+                onClick={() => navigate(face.route)}
+              />
+              <div className="pointer-events-none absolute inset-x-5 bottom-5 z-[2] flex flex-col items-start gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1">
+                    <p className="t-caption">{face.eyebrow || s.number}</p>
+                    <h2 className="t-display-m">{face.name}</h2>
+                  </div>
+                  <p className="t-body-s c-ivory-2">{s.body}</p>
                 </div>
-                <p className="t-body-s c-ivory-2">{s.body}</p>
+                <span className="k-btn k-btn-secondary k-btn-sm">
+                  {face.action}
+                  <Icon name="forward" size={16} />
+                </span>
               </div>
-              <span className="k-btn k-btn-secondary k-btn-sm">
-                {ACTION[s.heading] ?? 'Begin'}
-                <Icon name="forward" size={16} />
-              </span>
-            </div>
-          </Photo>
-        ))}
+            </Photo>
+          )
+        })}
       </section>
 
       {/* The fourth door: whatever it is. */}

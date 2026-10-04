@@ -5,6 +5,7 @@ import { SearchOverlay } from '@/components/SearchOverlay'
 import { Band, Chip, Icon, Photo, PhotoCarousel, Rail, Section, SectionHead, Status, Track, Wordmark } from '@/components/ui'
 import { CITIES, CITY_BY_SLUG, MONTHS, SERVICES } from '@/data/catalogue.generated'
 import { brandImage, cityCard, cityHero } from '@/lib/catalogue'
+import { serviceFace } from '@/lib/services'
 import type { CitySummary } from '@/lib/catalogue'
 import { parseItemKey, savedCityKey } from '@/lib/itinerary'
 import { currentBooking, holdLeft, isBooking, isLive, when, type DeskRequest } from '@/lib/desk'
@@ -82,14 +83,6 @@ function proposalsFor(wishlist: string[], month: number, monthName: string): Pro
 /* --------------------------------------------------------------- services -- */
 
 /** The house's four counters. The first three are the catalogue's own. */
-const SERVICE_IMAGE: Record<string, string> = { Flights: 'cabin', Hotels: 'suite', Visas: 'visas' }
-/** The catalogue says "Hotels"; the house says "Stays". */
-const SERVICE_NAME: Record<string, string> = { Hotels: 'Stays' }
-const SERVICE_LINE: Record<string, string> = {
-  Flights: 'Business and first',
-  Hotels: 'The room, not the listing',
-  Visas: 'Checked, filed, tracked',
-}
 
 /**
  * The home hero, as four pictures rather than one.
@@ -427,21 +420,32 @@ export default function Discover() {
           }
         />
         <div className="grid grid-cols-2 gap-3">
-          {SERVICES.map((s) => (
-            <button key={s.heading} type="button" onClick={() => navigate('/services')} className="text-left">
-              <Photo
-                src={brandImage(SERVICE_IMAGE[s.heading] ?? s.image ?? 'home')}
-                alt={SERVICE_NAME[s.heading] ?? s.heading}
-                label={SERVICE_NAME[s.heading] ?? s.heading}
-                className="h-44 w-full"
+          {SERVICES.map((s) => {
+            /* Straight to the counter they tapped. This used to land on the
+               services index, which asked a member to choose the thing they
+               had already chosen. */
+            const face = serviceFace(s.heading, s.image)
+            return (
+              <button
+                key={s.heading}
+                type="button"
+                onClick={() => navigate(face.route)}
+                className="text-left"
               >
-                <span className="absolute inset-x-3.5 bottom-3.5 flex flex-col gap-0.5">
-                  <span className="t-title">{SERVICE_NAME[s.heading] ?? s.heading}</span>
-                  {SERVICE_LINE[s.heading] && <span className="t-caption">{SERVICE_LINE[s.heading]}</span>}
-                </span>
-              </Photo>
-            </button>
-          ))}
+                <Photo
+                  src={brandImage(face.image)}
+                  alt={face.name}
+                  label={face.name}
+                  className="h-44 w-full"
+                >
+                  <span className="absolute inset-x-3.5 bottom-3.5 flex flex-col gap-0.5">
+                    <span className="t-title">{face.name}</span>
+                    {face.line ? <span className="t-caption">{face.line}</span> : null}
+                  </span>
+                </Photo>
+              </button>
+            )
+          })}
           <button type="button" onClick={() => navigate('/desk')} className="text-left">
             <Photo
               src={brandImage('champagne')}
