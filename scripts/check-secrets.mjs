@@ -39,6 +39,7 @@ const PATTERNS = [
   ["Google API key", /AIza[0-9A-Za-z_-]{35}/],
   ["Razorpay key", /rzp_(?:live|test)_[A-Za-z0-9]{10,}/],
   ["Meta access token", /\bEAA[A-Za-z0-9]{60,}/],
+  ["PostgreSQL password", /postgres(?:ql)?:\/\/[^:\s/]+:(?!<|your|replace)[^@\s]+@/],
   ["Private key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
 ];
 
@@ -51,6 +52,10 @@ function readEnvValues() {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
       if (!m) continue;
       const value = m[2].replace(/^['"]|['"]$/g, "").trim();
+      if (/^(DATABASE_URL|ACL_API_PASSWORD|ACL_WEBHOOK_SECRET)$/.test(m[1]) && value.length >= 16) {
+        out.set(value, m[1]);
+        continue;
+      }
       // Paths, URLs, model names and flags are configuration, not secrets.
       if (value.length < 16 || /^(https?:\/\/|\/|\.\/|true$|false$)/.test(value) || /^[a-z0-9.-]+$/.test(value)) continue;
       if (/(KEY|SECRET|TOKEN|PASSWORD|TENANT)/.test(m[1])) out.set(value, m[1]);

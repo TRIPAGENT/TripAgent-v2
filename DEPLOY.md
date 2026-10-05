@@ -196,3 +196,6 @@ Two things to get right on the host, both already set in `vercel.json`:
   charged automatically. Put the real figure in `public/data/legal.json` — the terms, the
   fee-covers clause and the refund clause — **before you charge anyone**, and have it read
   by whoever signs off your terms.
+
+
+The profile supports verified WhatsApp chat with Tara. See [WhatsApp integration](docs/WHATSAPP.md) and configure ACL/Supabase in the backend before enabling it.

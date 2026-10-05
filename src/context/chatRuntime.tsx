@@ -1,13 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useStore } from './store'
-import { currentChatJob, submitChatJob, toChatMessages, type ChatJob } from '@/lib/agentClient'
+import { currentChatJob, submitChatJob, toChatMessages, type ChatJob, fetchChatHistory } from '@/lib/agentClient'
 import { msg } from '@/lib/concierge'
 
 interface Runtime { job: ChatJob | null; submitting: boolean; connectionIssue: boolean; submit: (message: string) => Promise<void> }
 const Context = createContext<Runtime | null>(null)
 /** Lives above routes, so a plan continues while the member explores Journeys. */
 export function ChatRuntimeProvider({ children }: { children: ReactNode }) {
-  const { member, pushChat, setPlan } = useStore()
+  const { member, pushChat, setPlan, chat } = useStore()
+  const chatIds = useRef(new Set<string>())
+  chatIds.current = new Set(chat.map(m => m.id))
   const [job, setJob] = useState<ChatJob | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [connectionIssue, setConnectionIssue] = useState(false)
@@ -53,6 +55,28 @@ export function ChatRuntimeProvider({ children }: { children: ReactNode }) {
     void poll()
     return () => { cancelled = true; clearTimeout(timer) }
   }, [member?.code])
+  // Reflect WhatsApp replies while the member keeps the web app open.
+  useEffect(() => {
+    const code = member?.code
+    if (!code) return
+    let cancelled = false
+    const sync = async () => {
+      if (document.visibilityState === 'hidden') return
+      try {
+        const history = await fetchChatHistory()
+        if (cancelled || owner.current !== code) return
+        for (const message of history) {
+          if (chatIds.current.has(message.id)) continue
+          chatIds.current.add(message.id)
+          pushChat(message)
+          if (message.planUrl) setPlan({ url: message.planUrl, title: message.release?.title ?? 'Your itinerary', at: message.at })
+        }
+      } catch { /* The normal job poll reports connection trouble; try history again later. */ }
+    }
+    const timer = window.setInterval(() => void sync(), 10000)
+    document.addEventListener('visibilitychange', sync)
+    return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener('visibilitychange', sync) }
+  }, [member?.code, pushChat, setPlan])
   const submit = useCallback(async (text: string) => {
     if (posting.current) return
     const code = member?.code

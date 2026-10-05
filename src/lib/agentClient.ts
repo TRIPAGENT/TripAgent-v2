@@ -547,3 +547,15 @@ export async function fetchChatHistory(): Promise<ChatMessage[]> {
     ? [msg('member', m.content, { id: m.id, at: m.at ?? 0 })]
     : m.role === 'assistant' ? toChatMessages(m.parts ?? [m.content]).map((reply, i) => ({ ...reply, id: `${m.id}-${i}`, at: m.at ?? 0 })) : [])
 }
+
+export interface WhatsAppStatus {
+  enabled: boolean
+  linked: boolean
+  phoneMasked: string | null
+  chatUrl: string | null
+}
+export const fetchWhatsAppStatus = () => getJson<WhatsAppStatus>(`${BASE}/api/whatsapp`)
+export const connectWhatsApp = (phone: string) => postJson<{ url: string; expiresAt: string }>(`${BASE}/api/whatsapp/link`, { phone })
+export const disconnectWhatsApp = () => postJson<{ ok: true }>(`${BASE}/api/whatsapp/unlink`)
+
+export const cancelWhatsAppLink = () => postJson<{ ok: true }>(`${BASE}/api/whatsapp/link/cancel`)

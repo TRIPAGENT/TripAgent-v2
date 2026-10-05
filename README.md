@@ -240,3 +240,6 @@ of argument is how a page gets closed without being read.
   not a placeholder — and no named advisor until a real one is assigned.
 - Failure is written as hospitality, and never asks a member to restart a server.
 - The full system, including the type scale and the voice, is in [DESIGN.md](DESIGN.md).
+
+
+The profile supports verified WhatsApp chat with Tara. See [WhatsApp integration](docs/WHATSAPP.md) and configure ACL/Supabase in the backend before enabling it.

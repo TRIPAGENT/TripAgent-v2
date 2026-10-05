@@ -1,3 +1,4 @@
+import WhatsAppChat from '@/components/WhatsAppChat'
 import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
@@ -325,6 +326,8 @@ export default function Membership() {
           </p>
         </div>
       </section>
+
+      <WhatsAppChat key={code} />
 
       {/* ------------------------------------- what Tara knows ---- */}
       <section className="flex flex-col gap-5 px-6 pt-12">
