@@ -5,7 +5,7 @@ import { connectWhatsApp, cancelWhatsAppLink, disconnectWhatsApp, fetchWhatsAppS
 /** Only the authenticated backend decides which account owns the WhatsApp number. */
 export default function WhatsAppChat() {
   const [status, setStatus] = useState<WhatsAppStatus | null>(null)
-  const [phone, setPhone] = useState('')
+  const [phone, setPhone] = useState('+91 ')
   const [link, setLink] = useState<{ url: string; expiresAt: string } | null>(null)
   const [open, setOpen] = useState(false)
   const [working, setWorking] = useState(false)
@@ -33,7 +33,11 @@ export default function WhatsAppChat() {
   }, [link])
 
   async function connect(event: React.FormEvent) {
-    event.preventDefault(); setWorking(true); setError(''); setExpired(false)
+    event.preventDefault(); setError(''); setExpired(false)
+    if (!phone.trim().startsWith('+')) {
+      setError('Include your country code. For India, enter +91 followed by your 10-digit WhatsApp number.'); return
+    }
+    setWorking(true)
     try { setLink(await connectWhatsApp(phone)) }
     catch (e) { setError(e instanceof Error ? e.message : 'We could not create your WhatsApp link. Please try again.') }
     finally { setWorking(false) }
@@ -48,7 +52,7 @@ export default function WhatsAppChat() {
   }
   async function disconnect() {
     setWorking(true); setError('')
-    try { await disconnectWhatsApp(); setStatus(await fetchWhatsAppStatus()); setLink(null); setPhone('') }
+    try { await disconnectWhatsApp(); setStatus(await fetchWhatsAppStatus()); setLink(null); setPhone('+91 ') }
     catch (e) { setError(e instanceof Error ? e.message : 'We could not disconnect WhatsApp. Please try again.') }
     finally { setWorking(false) }
   }
@@ -71,11 +75,12 @@ export default function WhatsAppChat() {
     {status?.enabled && !status.linked && open && <form onSubmit={connect} className="flex flex-col gap-3">
       <label htmlFor="whatsapp-phone" className="t-caption">Your WhatsApp number, including country code</label>
       <div className="k-field"><input id="whatsapp-phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+91 9876543210" maxLength={30} required value={phone} disabled={working || Boolean(link)} onChange={e => setPhone(e.target.value)} /></div>
+      <p className="t-caption">For India, keep +91 before your 10-digit number. For another country, replace +91 with your country code.</p>
       <p className="t-caption">Send the prepared message from this number to connect it to your profile. Only you can use this link; it expires after 10 minutes.</p>
       {!link && <button type="submit" disabled={working} className="k-btn k-btn-primary">{working ? 'Preparing your link…' : 'Create WhatsApp link'}</button>}
       {link && <>
         <a className="k-btn k-btn-primary" href={link.url} target="_blank" rel="noopener noreferrer">Open WhatsApp and send <Icon name="arrow-up-right" size={18} /></a>
-        <p className="t-caption" role="status">Waiting for your message. Your profile will update once WhatsApp is connected.</p>
+        <p className="t-caption" role="status">Send the prefilled LINK message in WhatsApp. Tara will confirm your connection and you can start chatting here or on WhatsApp.</p>
       </>}
       <button type="button" className="k-btn k-btn-secondary" disabled={working} onClick={() => void cancel()}>Cancel</button>
     </form>}
