@@ -41,6 +41,8 @@ export interface Choice {
   /** One to three comparison bullets, known facts only. */
   highlights?: string[]
   inclusions?: Inclusion[]
+  photo?: { url: string; alt: string; source: string; caption: string }
+  photos?: { url: string; alt: string; source: string; caption: string }[]
   flight?: FlightLeg
 }
 
@@ -87,6 +89,7 @@ export interface Row {
 export interface DayRow extends Row {
   date?: string
   place?: string
+  stops?: { name: string; query: string }[]
 }
 
 export interface TripPlan {

@@ -788,3 +788,27 @@
 .pv-alt-stack > div { padding: 14px 0; border-top: 1px solid var(--line); }
 .pv-alt-stack > div:first-child { padding-top: 0; border-top: 0; }
 .pv-alt-stack .pv-option { padding: 0; border: 0; }
+
+/* On-demand property photographs: touch swipe, keyboard and large tap controls. */
+.pv-gallery { min-width: 0; width: 100%; background: #f4f1eb; }
+.pv-gallery-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; width: 100%; }
+.pv-gallery-track::-webkit-scrollbar { display: none; }
+.pv-gallery .pv-gallery-slide { flex: 0 0 100%; min-width: 0; margin: 0; scroll-snap-align: start; }
+.pv-gallery-slide img { display: block; width: 100%; height: clamp(200px, 35vw, 300px); object-fit: cover; }
+.pv-gallery-slide figcaption { display: block; padding: 8px 12px; font-size: 11px; line-height: 1.5; color: var(--muted, #766b5b); }
+.pv-gallery-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 12px; }
+.pv-gallery-controls button { border: 0; background: transparent; font: inherit; font-size: 26px; width: 44px; height: 44px; cursor: pointer; color: inherit; }
+.pv-gallery-controls button:disabled { opacity: .3; cursor: default; }
+.pv-gallery-more { display: block; padding: 4px 12px 12px; font-size: 12px; }
+.pv-gallery-empty { width: 100%; min-height: 200px; padding: 32px 20px; display: grid; place-items: center; color: var(--muted, #766b5b); font-size: 13px; }
+.pv-property-preview { margin: 8px 0; font-size: 12px; }
+.pv-property-preview summary { cursor: pointer; padding: 8px 0; }
+.pv-day-map { display: inline-block; margin: 12px 12px 4px 0; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.pv-map-stops { font-size: 12px; line-height: 1.6; color: var(--muted, #766b5b); }
+.pv-evidence .pv-bullets, .pv-more .pv-keypoints { padding-left: 18px; line-height: 1.6; }
+.pv-evidence .pv-bullets li, .pv-more .pv-keypoints li { margin: 6px 0; }
+[data-photo-day] .pv-photo-credit { background: rgba(255,255,255,.9); color: #544a3d; }
+.pv-hero > .pv-photo-credit { position: absolute; bottom: 6px; right: 12px; background: rgba(255,255,255,.9); color: #544a3d; padding: 3px 6px; font-size: 10px; }
+@media print { .pv-gallery-track { overflow: hidden; } .pv-gallery-controls, .pv-gallery-more { display: none; } .pv-gallery-slide img { height: 180px; } }
+
+.pv-page .pv-bullets, .pv-page .pv-keypoints { list-style: disc; }

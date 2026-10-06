@@ -504,16 +504,19 @@ export interface PlacePhoto {
  * anything a member is looking at.
  */
 export async function fetchPlacePhoto(q: string, width = 1200, expectedName?: string): Promise<PlacePhoto | null> {
+  return (await fetchPlacePhotos(q, width, expectedName, 1))[0] ?? null
+}
+export async function fetchPlacePhotos(q: string, width = 1200, expectedName?: string, count = 4): Promise<PlacePhoto[]> {
   try {
-    const res = await sessionFetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}${expectedName ? `&name=${encodeURIComponent(expectedName)}` : ''}`, {
+    const res = await sessionFetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}&count=${count}${expectedName ? `&name=${encodeURIComponent(expectedName)}` : ''}`, {
       headers: authHeaders(),
       signal: AbortSignal.timeout(22_000),
     })
-    if (!res.ok) return null
-    const body = (await res.json()) as { photo?: PlacePhoto | null }
-    return body.photo ?? null
+    if (!res.ok) return []
+    const body = (await res.json()) as { photo?: PlacePhoto | null; photos?: PlacePhoto[] }
+    return body.photos ?? (body.photo ? [body.photo] : [])
   } catch {
-    return null
+    return []
   }
 }
 
