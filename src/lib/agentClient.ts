@@ -49,14 +49,23 @@ export const SIGNED_OUT_EVENT = 'tripagent:signed-out'
 
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
   const s = readSession()
-  return s ? { ...extra, Authorization: `Bearer ${s.token}` } : extra
+  if (!s) {
+    clearSession()
+    window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
+    throw new AgentError('Sign in again to view your saved chat. Accepted itinerary work continues in the background.', false)
+  }
+  return { ...extra, Authorization: `Bearer ${s.token}` }
 }
 
-function noteAuth(res: Response) {
-  if (res.status === 401 && readSession()) {
+async function sessionFetch(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
+  const sent = new Headers(init.headers).get('Authorization')?.replace(/^Bearer /, '')
+  const res = await fetch(input, init)
+  // A stale request must not sign out a newly signed-in member.
+  if (res.status === 401 && sent === readSession()?.token) {
     clearSession()
     window.dispatchEvent(new Event(SIGNED_OUT_EVENT))
   }
+  return res
 }
 
 export interface SessionMember {
@@ -96,9 +105,8 @@ export async function signInWithCode(code: string): Promise<SessionMember> {
 export async function checkSession(): Promise<SessionMember | false | null> {
   if (!readSession()) return false
   try {
-    const res = await fetch(`${BASE}/api/session`, { headers: authHeaders(), signal: AbortSignal.timeout(6_000) })
+    const res = await sessionFetch(`${BASE}/api/session`, { headers: authHeaders(), signal: AbortSignal.timeout(6_000) })
     if (res.status === 401) {
-      clearSession()
       return false
     }
     if (!res.ok) return null
@@ -152,7 +160,7 @@ interface ChatResponse {
 export async function sendToAgent(message: string): Promise<ChatMessage[]> {
   let res: Response
   try {
-    res = await fetch(`${BASE}/api/chat`, {
+    res = await sessionFetch(`${BASE}/api/chat`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ message }),
@@ -167,7 +175,6 @@ export async function sendToAgent(message: string): Promise<ChatMessage[]> {
     )
   }
 
-  noteAuth(res)
   let body: ChatResponse = {}
   try {
     body = (await res.json()) as ChatResponse
@@ -202,6 +209,7 @@ export type StreamEvent =
  * minutes deserves to know it is reading sources rather than inventing.
  */
 const TOOL_LABELS: Record<string, string> = {
+  resuming_plan: 'Recovering your itinerary',
   build_trip_plan: 'Creating your itinerary',
   search_travel_prices: 'Checking published travel prices',
   build_comparison: 'Laying them side by side',
@@ -236,7 +244,7 @@ export async function streamFromAgent(
 ): Promise<ChatMessage[]> {
   let res: Response
   try {
-    res = await fetch(`${BASE}/api/chat/stream`, {
+    res = await sessionFetch(`${BASE}/api/chat/stream`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ message }),
@@ -251,7 +259,6 @@ export async function streamFromAgent(
     )
   }
 
-  noteAuth(res)
   if (!res.ok || !res.body) {
     let error: string | undefined
     try {
@@ -339,11 +346,10 @@ function planTitleFrom(intro: string): string {
 async function getJson<T>(url: string): Promise<T> {
   let res: Response
   try {
-    res = await fetch(url, { headers: authHeaders(), signal: AbortSignal.timeout(15_000) })
+    res = await sessionFetch(url, { headers: authHeaders(), signal: AbortSignal.timeout(15_000) })
   } catch {
     throw new AgentError('The Desk is not reachable from this device right now.')
   }
-  noteAuth(res)
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string }
     throw new AgentError(body.error ?? 'The Desk could not find that.', res.status >= 500)
@@ -354,7 +360,7 @@ async function getJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   let res: Response
   try {
-    res = await fetch(url, {
+    res = await sessionFetch(url, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body ?? {}),
@@ -363,7 +369,6 @@ async function postJson<T>(url: string, body?: unknown): Promise<T> {
   } catch {
     throw new AgentError('The Desk is not reachable from this device right now. Nothing was sent.')
   }
-  noteAuth(res)
   const json = (await res.json().catch(() => ({}))) as T & { error?: string }
   if (!res.ok) throw new AgentError(json.error ?? 'The Desk could not take that just now. Nothing was sent.', res.status >= 500)
   return json
@@ -500,7 +505,7 @@ export interface PlacePhoto {
  */
 export async function fetchPlacePhoto(q: string, width = 1200, expectedName?: string): Promise<PlacePhoto | null> {
   try {
-    const res = await fetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}${expectedName ? `&name=${encodeURIComponent(expectedName)}` : ''}`, {
+    const res = await sessionFetch(`${BASE}/api/place-photo?q=${encodeURIComponent(q)}&w=${width}${expectedName ? `&name=${encodeURIComponent(expectedName)}` : ''}`, {
       headers: authHeaders(),
       signal: AbortSignal.timeout(22_000),
     })
@@ -524,8 +529,7 @@ export interface ChatJob {
   messages: { id: string; text: string; state: 'queued' | 'running' | 'completed' | 'failed'; replies: string[] }[]
 }
 async function jobRequest(path: string, body?: { message: string; requestId: string }): Promise<ChatJob | null> {
-  const res = await fetch(`${BASE}${path}`, { method: body ? 'POST' : 'GET', headers: authHeaders(body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000) })
-  noteAuth(res)
+  const res = await sessionFetch(`${BASE}${path}`, { method: body ? 'POST' : 'GET', headers: authHeaders(body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000) })
   const data = await res.json().catch(() => ({})) as { job?: ChatJob; error?: string }
   if (!res.ok) throw new AgentError(data.error ?? 'Tara’s progress could not be reached. Try again shortly.')
   return data.job ?? null

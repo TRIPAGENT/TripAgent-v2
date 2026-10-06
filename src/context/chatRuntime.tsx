@@ -44,16 +44,23 @@ export function ChatRuntimeProvider({ children }: { children: ReactNode }) {
     setJob(null); setSubmitting(false); setConnectionIssue(false); posting.current = null; pending.current = null; latest.current = null; announced.current.clear()
     if (!code) return
     let cancelled = false
+    let polling = false
     let timer: ReturnType<typeof setTimeout>
     const poll = async () => {
+      if (polling || cancelled) return
+      polling = true
       try {
         const next = await currentChatJob()
         if (!cancelled && owner.current === code) { applyRef.current(next); setConnectionIssue(false) }
       } catch { if (!cancelled) setConnectionIssue(true) }
+      polling = false
       if (!cancelled) timer = setTimeout(poll, 1800)
     }
     void poll()
-    return () => { cancelled = true; clearTimeout(timer) }
+    const resume = () => { if (!document.hidden) { clearTimeout(timer); void poll() } }
+    document.addEventListener('visibilitychange', resume)
+    window.addEventListener('online', resume)
+    return () => { cancelled = true; clearTimeout(timer); document.removeEventListener('visibilitychange', resume); window.removeEventListener('online', resume) }
   }, [member?.code])
   // Reflect WhatsApp replies while the member keeps the web app open.
   useEffect(() => {
