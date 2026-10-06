@@ -544,7 +544,7 @@ export const saveAccountState = (patch: Partial<AccountState>) => postJson(`${BA
 export async function fetchChatHistory(): Promise<ChatMessage[]> {
   const { messages } = await getJson<{ messages: { id: string; role: string; content: string; at?: number; parts?: string[] }[] }>(`${BASE}/api/history`)
   return messages.flatMap(m => m.role === 'user'
-    ? [msg('member', m.content, { id: m.id, at: m.at ?? 0 })]
+    ? [msg('member', m.content, { id: m.id, at: m.at ?? 0, delivery: 'received' })]
     : m.role === 'assistant' ? toChatMessages(m.parts ?? [m.content]).map((reply, i) => ({ ...reply, id: `${m.id}-${i}`, at: m.at ?? 0 })) : [])
 }
 

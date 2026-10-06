@@ -107,4 +107,6 @@ export interface ChatMessage {
   planUrl?: string
   /** Set when the turn failed, so the UI can offer a retry instead of a dead end. */
   failed?: boolean
+  /** Receipt confirmation is separate from whether Tara finished the reply. */
+  delivery?: 'sending' | 'received' | 'unconfirmed'
 }

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useChatRuntime } from '@/context/chatRuntime'
+import { chatAcknowledgement } from '@/lib/chatAcknowledgement'
+import { CHAT_SUGGESTIONS, addSuggestionToDraft } from '@/lib/chatSuggestions'
 import { planKeyFrom } from '@/lib/planLinks'
 import { Screen } from '@/components/Shell'
 import { AgentMark, Btn, Card, Horizon, Icon } from '@/components/ui'
@@ -173,6 +175,13 @@ export default function Concierge() {
   const [listening, setListening] = useState(false)
 
   const endRef = useRef<HTMLDivElement>(null)
+  const composerRef = useRef<HTMLInputElement>(null)
+  const currentMember = useRef(member?.code)
+  currentMember.current = member?.code
+  useEffect(() => {
+    currentMember.current = member?.code
+    return () => { currentMember.current = undefined }
+  }, [member?.code])
   const greeted = useRef(false)
   const city = CITY_BY_SLUG[activeCity] ?? null
   const live = Boolean(health?.ok && health.modelReady)
@@ -290,24 +299,26 @@ export default function Concierge() {
    * Tara.
    */
   const reply = useCallback(async (body: string) => {
+    const code = member?.code
     setLastSent(body)
     if (live || runtime.job?.status === 'running') {
       try { await runtime.submit(body) }
-      catch (error) { pushChat(msg('ai', error instanceof Error ? error.message : 'Tara could not receive that message.', { failed: true })) }
+      catch (error) { if (currentMember.current === code) pushChat(msg('ai', error instanceof Error ? error.message : 'Tara could not receive that message.', { failed: true })) }
       return
     }
     setLocalThinking(true)
     try {
       const fresh = await agentHealth()
+      if (currentMember.current !== code) return
       setHealth(fresh)
       if (fresh?.ok && fresh.modelReady) await runtime.submit(body)
       else {
         pushChat(msg('member', body))
         respond(body, city, chat.filter(m => m.role === 'member').length).forEach(pushChat)
       }
-    } catch (error) { pushChat(msg('ai', error instanceof AgentError ? error.message : 'Tara could not receive that message.', { failed: true })) }
-    finally { setLocalThinking(false) }
-  }, [live, runtime, pushChat, city, chat])
+    } catch (error) { if (currentMember.current === code) pushChat(msg('ai', error instanceof AgentError ? error.message : 'Tara could not receive that message.', { failed: true })) }
+    finally { if (currentMember.current === code) setLocalThinking(false) }
+  }, [live, runtime, pushChat, city, chat, member?.code])
 
   const send = useCallback(async (text: string) => {
     const body = text.trim()
@@ -573,6 +584,7 @@ export default function Concierge() {
           const day = startOfDay(m.at)
           const divider = day !== lastDay
           lastDay = day
+          const acknowledgement = chatAcknowledgement(m, runtime.job)
 
           return (
             <div key={m.id} className="flex flex-col gap-4">
@@ -585,7 +597,15 @@ export default function Concierge() {
               )}
 
               {m.role === 'member' ? (
-                <p className="k-msg-member whitespace-pre-wrap">{m.text}</p>
+                <div className="flex flex-col items-end gap-1.5">
+                  <p className="k-msg-member whitespace-pre-wrap">{m.text}</p>
+                  {acknowledgement && <p className="t-caption c-ivory-3 flex items-center gap-1.5" role="status" aria-label={acknowledgement.label}>
+                    <span aria-hidden="true" className="inline-flex items-center justify-center rounded-full px-2 py-1" style={{ background: 'var(--champagne-3)', border: '1px solid var(--champagne-line)' }}>{acknowledgement.emoji}</span>
+                    <span>{acknowledgement.label}</span>
+                    {acknowledgement.working && <span aria-hidden="true" className="k-breathe inline-block h-1.5 w-1.5 rounded-full" style={{ background: 'var(--champagne)' }} />}
+                  </p>}
+                  {m.delivery === 'unconfirmed' && <button type="button" className="k-link t-caption" style={{ minHeight: 44 }} onClick={() => { setDraft(m.text); composerRef.current?.focus() }}>Review and resend</button>}
+                </div>
               ) : m.role === 'advisor' ? (
                 <div className="k-msg-desk">
                   <p className="whitespace-pre-wrap">{m.text}</p>
@@ -714,6 +734,15 @@ export default function Concierge() {
           </div>
         )}
 
+        {!thinking && displayChat.some(message => message.role === 'ai' && !message.failed) && <section aria-label="Explore travel options" className="flex flex-col gap-2.5 pt-3">
+          <p className="t-caption c-ivory-3">Explore with Tara</p>
+          <div className="flex flex-wrap gap-2">
+            {CHAT_SUGGESTIONS.map(suggestion => <button key={suggestion.label} type="button" className="k-chip" style={{ minHeight: 44, padding: '0 14px' }} onClick={() => {
+              setDraft(current => addSuggestionToDraft(current, suggestion.prompt)); composerRef.current?.focus()
+            }}>{suggestion.label}<Icon name="arrow-up-right" size={14} /></button>)}
+          </div>
+          <p className="t-caption c-ivory-3">Compare a few options, then shape the trip together.</p>
+        </section>}
         <div ref={endRef} />
       </div>
 
@@ -757,6 +786,7 @@ export default function Concierge() {
           </label>
           <input
             id="concierge-ask"
+            ref={composerRef}
             type="text"
             placeholder={thinking ? "Anything to add to your journey?" : "Ask Tara…"}
             value={draft}

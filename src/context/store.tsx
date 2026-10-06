@@ -206,7 +206,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         state.choices = { ...remote.choices, ...pending.choices }
         // The server owns chat history. Preserve only cached unsent/error notices.
         const ids = new Set(history.map(m => m.id))
-        const extras = (cached?.chat ?? []).filter(m => !ids.has(m.id) && (m.failed || !m.id.startsWith('job-')))
+        const extras = (cached?.chat ?? []).filter(m => !ids.has(m.id) && (m.failed || m.delivery === 'unconfirmed' || !m.id.startsWith('job-')))
         cacheOwner.current = code
         current.current = { state, pending, chat: [...history, ...extras] }
         setAccount(state); setChat(current.current.chat); setRequests(desk)
@@ -237,7 +237,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch { return requests }
   }, [requests])
   const pushChat = useCallback((m: ChatMessage) => {
-    if (current.current.chat.some(existing => existing.id === m.id)) return
+    const existing = current.current.chat.find(message => message.id === m.id)
+    if (existing) {
+      if (!m.delivery || m.delivery === existing.delivery) return
+      current.current.chat = current.current.chat.map(message => message.id === m.id ? { ...message, delivery: m.delivery } : message)
+      setChat(current.current.chat); persist(); return
+    }
     current.current.chat = [...current.current.chat, m]
     setChat(current.current.chat); persist()
   }, [persist])
