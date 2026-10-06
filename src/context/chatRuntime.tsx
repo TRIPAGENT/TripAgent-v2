@@ -69,7 +69,10 @@ export function ChatRuntimeProvider({ children }: { children: ReactNode }) {
           if (chatIds.current.has(message.id)) continue
           chatIds.current.add(message.id)
           pushChat(message)
-          if (message.planUrl) setPlan({ url: message.planUrl, title: message.release?.title ?? 'Your itinerary', at: message.at })
+          if (message.planUrl) {
+            setPlan({ url: message.planUrl, title: message.release?.title ?? 'Your itinerary', at: message.at })
+            window.dispatchEvent(new Event('tripagent:plan-ready'))
+          }
         }
       } catch { /* The normal job poll reports connection trouble; try history again later. */ }
     }

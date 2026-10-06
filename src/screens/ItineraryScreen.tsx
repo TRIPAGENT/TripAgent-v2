@@ -44,6 +44,12 @@ export default function ItineraryScreen() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, member?.code])
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) void refreshRequests() }
+    const timer = window.setInterval(refresh, 15000)
+    document.addEventListener('visibilitychange', refresh)
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
+  }, [member?.code])
 
   /** A message the member has already composed: send it and open Tara. */
   const refine = useCallback(
@@ -138,12 +144,12 @@ export default function ItineraryScreen() {
 
   const plan = bundle.plan
   // Where this trip stands with the Desk decides what the one call to action says.
-  const req = requests.filter(isBooking).find((r) => r.planId === plan.id && (isLive(r) || r.status === 'paid'))
+  const req = requests.filter(isBooking).find((r) => r.planId === plan.id && (isLive(r) || r.status === 'closed'))
   const settled = req?.status === 'paid' || req?.status === 'closed'
   const bookingLabel = !req
     ? 'Send for a price'
     : req.status === 'quoted'
-      ? 'Review the price'
+      ? 'Review quote & pay'
       : settled
         ? 'Booked · see the details'
         : 'With the Desk · see where it stands'
@@ -177,6 +183,7 @@ export default function ItineraryScreen() {
         onRefine={refine}
         onAsk={ask}
         onShare={share}
+        bookingAction={{ label: bookingLabel, onClick: openBooking, detail: req?.status === 'quoted' ? 'Review the confirmed total and terms, then continue to secure payment.' : settled ? 'Payment is confirmed by the Desk. Your booking details stay with this journey.' : 'The Desk confirms rates and availability before sending your payable quote.' }}
         footer={
           <>
             {shared ? (

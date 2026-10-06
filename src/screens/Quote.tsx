@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Screen, TopBar, Dock } from '@/components/Shell'
 import { Btn, Card, Empty, Headline, Icon, Paper, Photo, Sheet, Sig } from '@/components/ui'
@@ -7,7 +7,7 @@ import { useStore } from '@/context/store'
 import { DESK } from '@/data/members'
 import { CITIES } from '@/data/catalogue.generated'
 import { brandImage } from '@/lib/catalogue'
-import { fileRequest, requestAction } from '@/lib/agentClient'
+import { fileRequest, requestAction, validatedPayment } from '@/lib/agentClient'
 import { currentBooking, holdLeft, inr, when } from '@/lib/desk'
 
 /**
@@ -60,6 +60,9 @@ export default function Quote() {
   const [sent, setSent] = useState<'paid' | 'call' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
+  const [openingPayment, setOpeningPayment] = useState(false)
+  const owner = useRef(member?.code); owner.current = member?.code
+  useEffect(() => { owner.current = member?.code; return () => { owner.current = undefined } }, [member?.code])
 
   useEffect(() => {
     void refreshRequests()
@@ -124,6 +127,21 @@ export default function Quote() {
     } catch (e) {
       setError((e as Error).message)
     }
+  }
+  async function openPayment() {
+    if (!r || openingPayment) return
+    const code = member?.code
+    setOpeningPayment(true); setError(null)
+    const tab = window.open('about:blank', '_blank')
+    if (tab) tab.opener = null
+    try {
+      const current = await validatedPayment(r.id)
+      if (owner.current !== code) { tab?.close(); return }
+      if (current.total !== q?.total || current.releasedAt !== q?.releasedAt) throw new Error('Your quote has changed. Close this confirmation and review the refreshed price.')
+      if (tab) tab.location.replace(current.url)
+      else window.location.assign(current.url)
+    } catch (e) { tab?.close(); if (owner.current === code) { setError((e as Error).message); void refreshRequests() } }
+    finally { if (owner.current === code) setOpeningPayment(false) }
   }
 
   /* ------------------------------------------------------------ paid ------ */
@@ -538,7 +556,7 @@ export default function Quote() {
       ) : null}
 
       <Dock>
-        {q.paymentUrl && left ? (
+        {r.status === 'quoted' && q.paymentUrl && left ? (
           <>
             <Btn tone="commit" className="flex-1" onClick={() => setConfirming(true)}>
               <span className="t-figure">Approve and pay {inr(q.total)}</span>
@@ -561,7 +579,7 @@ export default function Quote() {
         )}
       </Dock>
 
-      {confirming && q.paymentUrl && (
+      {confirming && r.status === 'quoted' && q.paymentUrl && left && (
         <Sheet onClose={() => setConfirming(false)} labelledBy="pay-title">
           <div className="flex flex-col gap-6 px-6 pb-2 pt-3">
             <header className="flex flex-col gap-3.5">
@@ -607,16 +625,16 @@ export default function Quote() {
             {error ? <p className="t-body-s c-amber">{error}</p> : null}
 
             <div className="flex flex-col gap-3.5">
-              <a
-                href={q.paymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                disabled={openingPayment}
+                onClick={() => void openPayment()}
                 className="k-btn k-btn-commit k-btn-block"
               >
                 <Icon name="lock" size={18} />
-                Continue to secure payment
-              </a>
-              <p className="t-caption c-ivory-3 text-center">You finish on Razorpay's secure page, then return here.</p>
+                {openingPayment ? 'Checking your quote…' : 'Continue to secure payment'}
+              </button>
+              <p className="t-caption c-ivory-3 text-center">You finish on the payment provider's secure page, then return here.</p>
               <Btn
                 tone="ghost"
                 block

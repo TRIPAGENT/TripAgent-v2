@@ -17,6 +17,7 @@ export interface ItineraryProps {
   onAsk: (draft: string) => void
   onShare: () => void
   footer?: ReactNode
+  bookingAction?: { label: string; detail: string; onClick: () => void }
 }
 const safeUrl = (url?: string) => url && /^https:\/\//i.test(url) ? url : undefined
 const placeName = (slug?: string | null) => slug ? CITY_BY_SLUG[slug]?.name ?? slug.replace(/-/g, ' ') : ''
@@ -80,7 +81,7 @@ function DayCard({ day, index, slug, hidden }: { day: DayRow; index: number; slu
   return <article className="pv-day-card" hidden={hidden}><Photo query={place} fallback={slug ? cityCard(slug) : undefined} className="pv-day-card-photo" /><div className="pv-day-card-body"><div className="pv-recgroup-eyebrow">Day {index + 1}{day.date ? ` · ${dateLabel(day.date)}` : ''}</div><h3 className="pv-day-head">{day.t}</h3>{day.m && <p className="pv-day-meta">{day.m}</p>}{day.highlights?.length ? <ul className="pv-bullets">{day.highlights.map((h, i) => <li key={i}>{h}</li>)}</ul> : <p className="pv-day-body">{day.d}</p>}</div></article>
 }
 
-export function Itinerary({ bundle, madeFor, coming, status, onRefine, onAsk, onShare, footer }: ItineraryProps) {
+export function Itinerary({ bundle, madeFor, coming, status, onRefine, onAsk, onShare, footer, bookingAction }: ItineraryProps) {
   const p = bundle.plan
   const { choices: saved, setChoices } = useStore()
   const [preview, setPreview] = useState<Record<string, number>>({})
@@ -113,6 +114,7 @@ export function Itinerary({ bundle, madeFor, coming, status, onRefine, onAsk, on
         <h2 className="pv-section-title">Where you stay</h2>{p.hotelOptions.map((g, i) => <Group key={`stay-${i}`} group={g} kind="stay" chosen={choices[`stay-${i}`] ?? 0} choose={n => select(`stay-${i}`, n)} place={placeName(bundle.places.stays[i]) || g.label.split('·')[0].trim()} />)}<Rows rows={p.stay} />{!p.hotelOptions.length && !p.stay.length && <p className="pv-option-detail">Stays still need to be added to this plan.</p>}
         <h2 className="pv-section-title">What it costs</h2><div className="pv-costtable">{p.allowance.length ? p.allowance.map((r, i) => <div key={i} className={`pv-costrow ${/total/i.test(r.k) ? 'pv-costrow--total' : ''}`}><span>{r.k}</span><span>{r.v}</span></div>) : <p className="pv-option-detail">Prices have not been verified yet.</p>}</div>
         {changes.length > 0 && <div className="pv-callout"><strong>Your choices are saved.</strong>The original cost summary has not been repriced for your selections. The Desk will check the revised total.<button className="pv-text-btn" onClick={() => onRefine(`Please revise my itinerary ${bundle.key} with these saved choices: ${changes.join('; ')}. Keep the same itinerary and confirm the revised pricing basis.`)}>Ask Tara to update this plan</button></div>}
+        {bookingAction && <div className="pv-pricing"><button className="pv-cta" onClick={bookingAction.onClick}>{bookingAction.label}</button><p className="pv-costnote">{bookingAction.detail}</p></div>}
         <button className="pv-cta" onClick={() => go('Days')}>See the day-by-day plan</button>
       </section>
       <section role="tabpanel" id="panel-Days" aria-labelledby="tab-Days" hidden={tab !== 'Days'}><h2 className="pv-section-title">{p.days.length} days, paced</h2><div className="pv-subtabs-row"><button className="pv-subtabs-chevron" aria-label="Scroll days left" onClick={() => dayTabs.current?.scrollBy({ left: -180, behavior: 'smooth' })}>‹</button><div className="pv-tabs pv-tabs--sub" ref={dayTabs}>{['All days', ...p.days.map((_, i) => `Day ${i + 1}`)].map((t, i) => <button key={t} className={`pv-tab ${day === i - 1 ? 'is-active' : ''}`} aria-pressed={day === i - 1} onClick={() => setDay(i - 1)}>{t}</button>)}</div><button className="pv-subtabs-chevron" aria-label="Scroll days right" onClick={() => dayTabs.current?.scrollBy({ left: 180, behavior: 'smooth' })}>›</button></div>

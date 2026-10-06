@@ -344,7 +344,10 @@ async function getJson<T>(url: string): Promise<T> {
     throw new AgentError('The Desk is not reachable from this device right now.')
   }
   noteAuth(res)
-  if (!res.ok) throw new AgentError('The Desk could not find that.', res.status >= 500)
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string }
+    throw new AgentError(body.error ?? 'The Desk could not find that.', res.status >= 500)
+  }
   return (await res.json()) as T
 }
 
@@ -411,6 +414,7 @@ export const fileRequest = (input: NewDeskRequest) =>
 
 export const requestAction = (id: string, action: 'cancel' | 'paid') =>
   postJson<{ request: DeskRequest }>(`${BASE}/api/requests/${id}/${action}`).then((r) => r.request)
+export const validatedPayment = (id: string) => getJson<{ url: string; total: number; currency: string; releasedAt?: string }>(`${BASE}/api/requests/${id}/payment`)
 
 /* ------------------------------------------------------------------ hotels --- */
 

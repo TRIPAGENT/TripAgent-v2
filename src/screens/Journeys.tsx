@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
 import { Btn, Card, Empty, Icon, Photo, Status, Track, type StatusTone } from '@/components/ui'
@@ -68,28 +68,36 @@ export default function Journeys() {
   const [error, setError] = useState<string | null>(null)
   const [segment, setSegment] = useState<Segment>('upcoming')
   const [now, setNow] = useState(() => Date.now())
+  const owner = useRef(member?.code); owner.current = member?.code
+  const loadVersion = useRef(0)
 
   const load = useCallback(() => {
+    const code = member?.code, version = ++loadVersion.current
     setError(null)
     void refreshRequests()
     fetchTrips()
-      .then((t) => setTrips(t.map((x) => ({ ...x, title: humanizePlan(x.title) }))))
-      .catch((e: Error) => setError(e.message))
+      .then((t) => { if (owner.current === code && version === loadVersion.current) setTrips(t.map((x) => ({ ...x, title: humanizePlan(x.title) }))) })
+      .catch((e: Error) => { if (owner.current === code && version === loadVersion.current) setError(e.message) })
     fetchDue('month')
-      .then(setComing)
+      .then(n => { if (owner.current === code && version === loadVersion.current) setComing(n) })
       .catch(() => undefined)
-    // refreshRequests changes on every list change; this is a one-shot load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    load()
+    // Refresh on the member, timer and document event; list changes do not restart it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [member?.code])
 
   useEffect(() => {
+    setTrips(null); setComing([])
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { loadVersion.current++ }
+  }, [load])
+
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) load() }
+    const timer = window.setInterval(refresh, 15000)
+    document.addEventListener('visibilitychange', refresh)
     window.addEventListener('tripagent:plan-ready', load)
-    return () => window.removeEventListener('tripagent:plan-ready', load)
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', refresh); window.removeEventListener('tripagent:plan-ready', load) }
   }, [load])
 
   // A hold is a clock. It counts down while the screen is open.
