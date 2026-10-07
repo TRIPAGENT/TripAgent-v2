@@ -33,9 +33,12 @@ import Handover from '@/screens/Handover'
 import Legal from '@/screens/Legal'
 
 function RequireMember({ children }: { children: ReactElement }) {
-  const { member } = useStore()
+  const { member, prefs } = useStore()
   const location = useLocation()
   if (!member) return <Navigate to="/signin" replace state={{ from: location.pathname + location.search }} />
+  // Members who answered the old five questions have no travel profile yet;
+  // send them through the three new steps once, wherever they land.
+  if (!prefs.profile && location.pathname !== '/onboarding') return <Navigate to="/onboarding" replace />
   return children
 }
 
