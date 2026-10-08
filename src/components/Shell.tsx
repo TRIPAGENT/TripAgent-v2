@@ -9,7 +9,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { Icon } from './icons'
-import { Mark } from './ui'
+import { BackButton, Mark } from './ui'
 import { useStore } from '@/context/store'
 
 const TABS = [
@@ -41,8 +41,8 @@ export function TabBar() {
          register and its labels wash out over ivory. */
       className="k-tabbar k-dark fixed z-40"
       style={{
-        left: 'max(16px, calc(50% - 224px))',
-        right: 'max(16px, calc(50% - 224px))',
+        left: 'max(16px, calc(50% - 199px))',
+        right: 'max(16px, calc(50% - 199px))',
         bottom: 'max(20px, env(safe-area-inset-bottom))',
       }}
     >
@@ -126,14 +126,7 @@ export function TopBar({
       style={{ top: 'max(54px, calc(env(safe-area-inset-top) + 12px))', height: 44 }}
     >
       {back ? (
-        <button
-          type="button"
-          aria-label="Back"
-          onClick={go}
-          className={`k-icon-btn ${solid ? 'k-icon-btn-solid' : ''}`}
-        >
-          <Icon name="back" size={20} />
-        </button>
+        <BackButton onClick={go} solid={solid} />
       ) : (
         <span className="w-11" />
       )}
@@ -168,8 +161,8 @@ export function Dock({
     <div
       className="k-dark fixed z-40"
       style={{
-        left: 'max(16px, calc(50% - 224px))',
-        right: 'max(16px, calc(50% - 224px))',
+        left: 'max(16px, calc(50% - 199px))',
+        right: 'max(16px, calc(50% - 199px))',
         bottom: 'max(20px, env(safe-area-inset-bottom))',
         background: 'transparent',
       }}
@@ -192,12 +185,14 @@ export function Screen({
   tabs = true,
   dock = false,
   tone = 'dark',
-  wide = false,
+  flush = false,
   className = '',
 }: {
   children: ReactNode
   tabs?: boolean
   dock?: boolean
+  /** Full-bleed screens (map, chat) that manage their own bottom edge. */
+  flush?: boolean
   /**
    * Which of the house's two grounds this screen sits on. Obsidian carries
    * arrival, photography and Tara; ivory carries the lists, the
@@ -205,16 +200,19 @@ export function Screen({
    * obsidian register either way, so a light screen still has a dark hero.
    */
   tone?: 'dark' | 'light'
-  wide?: boolean
   className?: string
 }) {
   const { pathname } = useLocation()
   return (
     <div
-      className={`mx-auto min-h-full w-full ${wide ? 'max-w-[1000px]' : 'max-w-app'} ${tone === 'light' ? 'k-light' : ''}`}
+      className={`mx-auto min-h-full w-full max-w-app ${tone === 'light' ? 'k-light' : ''}`}
       style={{ background: 'var(--ink-0)' }}
     >
-      <main key={pathname} className={`page-in relative ${className}`} style={{ paddingBottom: tabs || dock ? 132 : 0 }}>
+      <main key={pathname} className={`page-in relative ${className}`} style={{
+          // Tab bar or dock: room for it. Otherwise one standard gutter, so a
+          // CTA that ends the page never sits flush with the bottom edge.
+          paddingBottom: tabs || dock ? 132 : flush ? 0 : 'max(40px, calc(env(safe-area-inset-bottom) + 24px))',
+        }}>
         {children}
       </main>
       {tabs && <TabBar />}

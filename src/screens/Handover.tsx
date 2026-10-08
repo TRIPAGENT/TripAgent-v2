@@ -171,8 +171,8 @@ export default function Handover() {
       <div
         className="fixed z-40"
         style={{
-          left: 'max(16px, calc(50% - 224px))',
-          right: 'max(16px, calc(50% - 224px))',
+          left: 'max(16px, calc(50% - 199px))',
+          right: 'max(16px, calc(50% - 199px))',
           bottom: 'max(20px, env(safe-area-inset-bottom))',
         }}
       >

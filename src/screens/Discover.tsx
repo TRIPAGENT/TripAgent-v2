@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '@/components/Shell'
 import { SearchOverlay } from '@/components/SearchOverlay'
+import { MonthPicker } from '@/components/MonthPicker'
 import { Band, Chip, Icon, Photo, PhotoCarousel, Rail, Section, SectionHead, Status, Track, Wordmark } from '@/components/ui'
 import { CITIES, CITY_BY_SLUG, MONTHS, SERVICES } from '@/data/catalogue.generated'
 import { brandImage, cityCard, cityHero } from '@/lib/catalogue'
@@ -82,6 +83,15 @@ function proposalsFor(wishlist: string[], month: number, monthName: string): Pro
 
 /* --------------------------------------------------------------- services -- */
 
+/** Where each counter's photograph is cropped for its round frame, so the subject sits in the
+ *  middle: the cabin on its lit window, the suite on the view and the table, the visa map on
+ *  the person holding it. */
+const SERVICE_CROP: Record<string, string> = {
+  Flights: '94% 50%',
+  Hotels: '50% 42%',
+  Visas: '50% 50%',
+}
+
 /** The house's four counters. The first three are the catalogue's own. */
 
 /**
@@ -155,41 +165,44 @@ export default function Discover() {
       {/* --------------------------------------------------------- the hero -- */}
       <PhotoCarousel
         slides={HERO_SLIDES}
-        className="h-[min(560px,68svh)] w-full"
+        dots={false}
+        className="h-[min(576px,70svh)] w-full"
       >
         <header
           className="absolute left-4 right-4 z-10 flex items-center justify-between gap-3"
-          style={{ top: 'max(54px, calc(env(safe-area-inset-top) + 12px))', height: 44 }}
+          style={{ top: 'max(30px, calc(env(safe-area-inset-top) + 8px))', height: 44 }}
         >
-          <button
-            type="button"
-            className="k-icon-btn c-champagne"
-            aria-label={member?.name ? `Membership, ${member.name}` : 'Membership'}
-            onClick={() => navigate('/membership')}
-            style={{ fontFamily: 'var(--f-display)', fontSize: 14, letterSpacing: '0.04em' }}
-          >
-            {initials(member?.name)}
-          </button>
-
           <Wordmark size={15} />
 
-          <button
-            type="button"
-            className="k-icon-btn relative"
-            aria-label={live.length > 0 ? 'Requests, one with the Desk' : 'Requests'}
-            onClick={() => navigate('/status')}
-          >
-            <Icon name="bell" size={20} />
-            {live.length > 0 && (
-              <span
-                className="absolute right-[11px] top-[10px] h-2 w-2 rounded-full"
-                style={{ background: 'var(--champagne)', boxShadow: '0 0 0 2px rgba(10,10,11,.6)' }}
-              />
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="k-icon-btn relative"
+              aria-label={live.length > 0 ? 'Requests, one with the Desk' : 'Requests'}
+              onClick={() => navigate('/status')}
+            >
+              <Icon name="bell" size={20} />
+              {live.length > 0 && (
+                <span
+                  className="absolute right-[11px] top-[10px] h-2 w-2 rounded-full"
+                  style={{ background: 'var(--champagne)', boxShadow: '0 0 0 2px rgba(10,10,11,.6)' }}
+                />
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="k-icon-btn c-champagne"
+              aria-label={member?.name ? `Membership, ${member.name}` : 'Membership'}
+              onClick={() => navigate('/membership')}
+              style={{ fontFamily: 'var(--f-display)', fontSize: 14, letterSpacing: '0.04em' }}
+            >
+              {initials(member?.name)}
+            </button>
+          </div>
         </header>
 
-        <div className="absolute inset-x-6 bottom-7 z-10 flex flex-col gap-[18px]">
+        <div className="absolute inset-x-6 bottom-[52px] z-10 flex flex-col gap-[18px]">
           <p className="t-caption">{dateLine}</p>
           <h1 className="t-display-xxl">
             {greeting}
@@ -197,51 +210,56 @@ export default function Discover() {
             {firstName(member?.name) ? <em className="t-italic">{firstName(member?.name)}.</em> : null}
           </h1>
 
+          {/* Ask Tara, or search: frosted glass on the photograph. */}
+          <div className="k-dark k-hero-glass flex flex-col gap-3.5" style={{ background: 'transparent' }}>
+            <div className="k-composer">
+              <button
+                type="button"
+                onClick={() => ask('')}
+                className="flex min-w-0 flex-1 items-center gap-3 self-stretch text-left"
+              >
+                <span className="c-champagne flex">
+                  <Icon name="horizon" size={22} strokeWidth={1.6} />
+                </span>
+                <span className="t-body c-ivory-3 min-w-0 flex-1 truncate">Where would you like to be?</span>
+              </button>
+              <button
+                type="button"
+                aria-label="Search destinations"
+                className="k-icon-btn k-icon-btn-solid"
+                onClick={() => setSearchOpen(true)}
+              >
+                <Icon name="search" size={20} />
+              </button>
+            </div>
+
+            <div className="-mx-6">
+              <Rail>
+                {wishlist.length > 0 && (
+                  <Chip className="shrink-0" onClick={() => ask("Plan around what I've saved")}>
+                    Plan around what I&rsquo;ve saved
+                  </Chip>
+                )}
+                <Chip className="shrink-0" onClick={() => ask('Somewhere warm in December')}>
+                  Somewhere warm in December
+                </Chip>
+                <Chip className="shrink-0" onClick={() => ask('A quiet week, somewhere new')}>
+                  A quiet week, somewhere new
+                </Chip>
+              </Rail>
+            </div>
+          </div>
+
           {current ? <LiveCard request={current} onOpen={() => navigate('/status')} /> : null}
         </div>
       </PhotoCarousel>
 
-      {/* --------------------------------------------------- Tara -- */}
-      <section className="flex flex-col gap-3.5 pt-6">
-        <div className="k-composer mx-6">
-          <button
-            type="button"
-            onClick={() => ask('')}
-            className="flex min-w-0 flex-1 items-center gap-3 self-stretch text-left"
-          >
-            <span className="c-champagne flex">
-              <Icon name="horizon" size={22} strokeWidth={1.6} />
-            </span>
-            <span className="t-body c-ivory-3 min-w-0 flex-1 truncate">Where would you like to be?</span>
-          </button>
-          <button
-            type="button"
-            aria-label="Search destinations"
-            className="k-icon-btn k-icon-btn-solid"
-            onClick={() => setSearchOpen(true)}
-          >
-            <Icon name="search" size={20} />
-          </button>
-        </div>
-
-        <Rail className="pb-1">
-          {wishlist.length > 0 && (
-            <Chip className="shrink-0" onClick={() => ask("Plan around what I've saved")}>
-              Plan around what I&rsquo;ve saved
-            </Chip>
-          )}
-          <Chip className="shrink-0" onClick={() => ask('Somewhere warm in December')}>
-            Somewhere warm in December
-          </Chip>
-          <Chip className="shrink-0" onClick={() => ask('A quiet week, somewhere new')}>
-            A quiet week, somewhere new
-          </Chip>
-        </Rail>
-      </section>
-
+      {/* The ivory page rises over the photograph: rounded top corners, sitting on
+          the hero's dark foot, so the join reads as one surface laid over another. */}
+      <div className="relative -mt-6 rounded-t-[28px]" style={{ background: 'var(--ink-0)' }}>
       {/* ------------------------------------------------- a finite brief --- */}
       {proposals.length > 0 && (
-        <section className="flex flex-col gap-5 pt-[52px]">
+        <section className="flex flex-col gap-5 pt-7">
           <div className="flex flex-col gap-1.5 px-6">
             <h2 className="t-display-s">
               {COUNTS[proposals.length]} for this {day}
@@ -257,7 +275,7 @@ export default function Discover() {
                   alt={city.name}
                   label={city.name}
                   radius={22}
-                  className="h-[420px] w-full"
+                  className="h-[340px] w-full"
                 >
                   <button
                     type="button"
@@ -281,11 +299,11 @@ export default function Discover() {
                       </p>
                     )}
                     <h3 className="t-display-m">{city.name}</h3>
-                    <p className="t-caption">{city.tagline}</p>
+                    <p className="t-caption line-clamp-2">{city.tagline}</p>
                     {feasibility(city) && <p className="t-caption t-figure c-ivory">{feasibility(city)}</p>}
                     <button
                       type="button"
-                      className="k-btn k-btn-secondary k-btn-sm z-[2] mt-1.5 self-start"
+                      className="k-btn k-btn-glass k-btn-sm z-[2] mt-1.5 self-start"
                       onClick={() => ask(`Shape a trip to ${city.name}`)}
                     >
                       Shape it with Tara
@@ -295,82 +313,11 @@ export default function Discover() {
               </article>
             ))}
           </Rail>
-
-          <p className="t-caption c-ivory-3 flex items-center justify-center gap-2 px-6">
-            <Icon name="horizon" size={14} />
-            That&rsquo;s all for this {day}.
-          </p>
         </section>
       )}
 
-      {/* --------------------------------------------- deciding by the month */}
-      <section className="flex flex-col gap-[18px] pt-14">
-        <Section>
-          <SectionHead
-            title={`At their best in ${active.name}`}
-            action={
-              <button
-                type="button"
-                className="k-link c-ivory-2 shrink-0"
-                onClick={() => navigate(`/month/${active.no}`)}
-              >
-                All {atTheirBest.length}
-                <Icon name="forward" size={16} />
-              </button>
-            }
-          />
-        </Section>
-
-        <Rail className="pb-1">
-          {MONTHS.map((m) => (
-            <Chip key={m.no} on={m.no === month} className="shrink-0" onClick={() => setMonth(m.no)}>
-              {m.name}
-            </Chip>
-          ))}
-        </Rail>
-
-        {atTheirBest.length === 0 ? (
-          <p className="t-caption px-6">
-            Nowhere we cover is at its best in {active.name}. {MONTHS[thisMonth - 1].name} is a better month to
-            look at.
-          </p>
-        ) : (
-          <Rail key={month}>
-            {atTheirBest.slice(0, 12).map((c) => {
-              const key = savedCityKey(c.slug)
-              const saved = isSaved(key)
-              return (
-                <article key={c.slug} className="shrink-0" style={{ width: 216 }}>
-                  <Photo src={cityCard(c.slug)} alt={c.name} label={c.name} className="h-[292px] w-full">
-                    <button
-                      type="button"
-                      className="absolute inset-0 z-[1]"
-                      aria-label={`Open ${c.name}`}
-                      onClick={() => open(c.slug)}
-                    />
-                    <button
-                      type="button"
-                      aria-label={saved ? `Remove ${c.name}` : `Save ${c.name}`}
-                      aria-pressed={saved}
-                      onClick={() => toggleSaved(key)}
-                      className="k-icon-btn absolute right-2.5 top-2.5 z-[2]"
-                      style={{ width: 36, height: 36 }}
-                    >
-                      <Icon name="bookmark" size={16} filled={saved} />
-                    </button>
-                    <div className="absolute inset-x-4 bottom-4 z-[2] flex flex-col gap-1">
-                      {c.country && <p className="t-caption truncate">{c.country}</p>}
-                      <h3 className="t-display-s truncate">{c.name}</h3>
-                      {feasibility(c) && <p className="t-caption t-figure c-ivory truncate">{feasibility(c)}</p>}
-                    </div>
-                  </Photo>
-                </article>
-              )
-            })}
-          </Rail>
-        )}
-
-        <Section className="pt-2">
+      {/* ------------------------------------------------ the map, then the counters --- */}
+        <Section className="pt-6">
           <button
             type="button"
             onClick={() => navigate('/map')}
@@ -386,6 +333,106 @@ export default function Discover() {
             <Icon name="chevron-right" size={18} className="c-ivory-3" />
           </button>
         </Section>
+
+      {/* ------------------------------------------------- what we handle --- */}
+      <Section className="flex flex-col gap-[18px] pt-14">
+        <SectionHead
+          title="What we handle"
+          action={
+            <button type="button" className="k-link c-ivory-2 shrink-0" onClick={() => navigate('/services')}>
+              Services
+              <Icon name="forward" size={16} />
+            </button>
+          }
+        />
+        {/* Three round counters in one line. "Anything else" is no longer a tile here; the
+            Desk is one tap away from the band at the foot of this screen. */}
+        <div className="flex items-start justify-between gap-3">
+          {SERVICES.map((s) => {
+            /* Straight to the counter they tapped. */
+            const face = serviceFace(s.heading, s.image)
+            return (
+              <button
+                key={s.heading}
+                type="button"
+                onClick={() => navigate(face.route)}
+                className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center"
+              >
+                <Photo
+                  src={brandImage(face.image)}
+                  alt={face.name}
+                  label={face.name}
+                  radius={9999}
+                  veil="none"
+                  position={SERVICE_CROP[s.heading]}
+                  className="aspect-square w-full"
+                />
+                <span className="t-title-s">{face.name}</span>
+              </button>
+            )
+          })}
+        </div>
+      </Section>
+
+      {/* --------------------------------------------- deciding by the month */}
+      <section className="flex flex-col gap-[18px] pt-14">
+        <Section>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h2 className="t-display-s inline-flex items-center gap-3 whitespace-nowrap">
+              At their best in
+              <MonthPicker value={month} months={MONTHS} onChange={setMonth} />
+            </h2>
+            <button
+              type="button"
+              className="k-link c-ivory-2 shrink-0"
+              onClick={() => navigate(`/month/${active.no}`)}
+            >
+              All {atTheirBest.length}
+              <Icon name="forward" size={16} />
+            </button>
+          </div>
+        </Section>
+
+        {atTheirBest.length === 0 ? (
+          <p className="t-caption px-6">
+            Nowhere we cover is at its best in {active.name}. {MONTHS[thisMonth - 1].name} is a better month to
+            look at.
+          </p>
+        ) : (
+          <Rail key={month}>
+            {atTheirBest.slice(0, 12).map((c) => {
+              const key = savedCityKey(c.slug)
+              const saved = isSaved(key)
+              return (
+                <article key={c.slug} className="shrink-0" style={{ width: 216 }}>
+                  <Photo src={cityCard(c.slug)} alt={c.name} label={c.name} className="h-[240px] w-full">
+                    <button
+                      type="button"
+                      className="absolute inset-0 z-[1]"
+                      aria-label={`Open ${c.name}`}
+                      onClick={() => open(c.slug)}
+                    />
+                    <button
+                      type="button"
+                      aria-label={saved ? `Remove ${c.name}` : `Save ${c.name}`}
+                      aria-pressed={saved}
+                      onClick={() => toggleSaved(key)}
+                      className="k-icon-btn absolute bottom-3.5 right-3 z-[2]"
+                      style={{ width: 36, height: 36 }}
+                    >
+                      <Icon name="bookmark" size={16} filled={saved} />
+                    </button>
+                    <div className="absolute bottom-4 left-4 right-[60px] z-[2] flex flex-col gap-1">
+                      {c.country && <p className="t-caption truncate">{c.country}</p>}
+                      <h3 className="t-display-s truncate">{c.name}</h3>
+                      {feasibility(c) && <p className="t-caption t-figure c-ivory truncate">{feasibility(c)}</p>}
+                    </div>
+                  </Photo>
+                </article>
+              )
+            })}
+          </Rail>
+        )}
       </section>
 
       {/* ----------------------------------------------- what is in motion -- */}
@@ -408,66 +455,19 @@ export default function Discover() {
         </Section>
       )}
 
-      {/* ------------------------------------------------- what we handle --- */}
-      <Section className="flex flex-col gap-[18px] pt-14">
-        <SectionHead
-          title="What we handle"
-          action={
-            <button type="button" className="k-link c-ivory-2 shrink-0" onClick={() => navigate('/services')}>
-              Services
-              <Icon name="forward" size={16} />
-            </button>
-          }
-        />
-        <div className="grid grid-cols-2 gap-3">
-          {SERVICES.map((s) => {
-            /* Straight to the counter they tapped. This used to land on the
-               services index, which asked a member to choose the thing they
-               had already chosen. */
-            const face = serviceFace(s.heading, s.image)
-            return (
-              <button
-                key={s.heading}
-                type="button"
-                onClick={() => navigate(face.route)}
-                className="text-left"
-              >
-                <Photo
-                  src={brandImage(face.image)}
-                  alt={face.name}
-                  label={face.name}
-                  className="h-44 w-full"
-                >
-                  <span className="absolute inset-x-3.5 bottom-3.5 flex flex-col gap-0.5">
-                    <span className="t-title">{face.name}</span>
-                    {face.line ? <span className="t-caption">{face.line}</span> : null}
-                  </span>
-                </Photo>
-              </button>
-            )
-          })}
-          <button type="button" onClick={() => navigate('/desk')} className="text-left">
-            <Photo
-              src={brandImage('champagne')}
-              alt="Champagne poured into rows of coupes"
-              label="Anything else"
-              className="h-44 w-full"
-            >
-              <span className="absolute inset-x-3.5 bottom-3.5 flex flex-col gap-0.5">
-                <span className="t-title">Anything else</span>
-                <span className="t-caption">Ask the Desk</span>
-              </span>
-            </Photo>
-          </button>
-        </div>
-      </Section>
-
       {/* ------------------------------------------------- the dark band ---
           One obsidian statement near the foot of the home screen. The house
           reads as two-tone rather than as a pale app with a dark photograph
           at the top, and the band earns its weight by carrying the one thing
           a member is meant to remember: there are people behind this. */}
-      <Band tone="dark" className="mt-14 px-6 py-14">
+      <Band
+        tone="dark"
+        className="mt-14 px-6 pt-14"
+        /* The screen reserves 132px under its content for the tab bar, and that
+           strip shows the ivory ground. The band runs through it instead, and
+           the negative margin keeps the page the same length. */
+        style={{ paddingBottom: 'calc(56px + 132px)', marginBottom: -132 }}
+      >
         <p className="k-eyebrow">The house</p>
         <h2 className="t-display-m mt-4">
           You bring the <em className="t-italic">why.</em>
@@ -479,12 +479,9 @@ export default function Discover() {
           something moves.
         </p>
         <div className="mt-7 flex flex-wrap gap-2.5">
-          <button type="button" className="k-btn k-btn-secondary k-btn-sm" onClick={() => navigate('/desk')}>
+          <button type="button" className="k-btn k-btn-primary k-btn-sm" onClick={() => navigate('/desk')}>
             <Icon name="phone" size={16} />
             Speak to the Desk
-          </button>
-          <button type="button" className="k-btn k-btn-ghost k-btn-sm" onClick={() => navigate('/membership')}>
-            Your membership
           </button>
         </div>
       </Band>
@@ -498,6 +495,7 @@ export default function Discover() {
           }}
         />
       )}
+      </div>
     </Screen>
   )
 }

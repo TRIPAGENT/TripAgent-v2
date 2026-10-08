@@ -183,6 +183,42 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.6), 0 30px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6);
   color: var(--ivory);
 }
+/* The card catching the light. Two effects on their own clocks: a shimmer
+   sweeping left to right (3s, then 6s still: a 9s cycle) and a glimmer
+   travelling once around the edge (1.5s, then 8s still: a 9.5s cycle). The
+   glimmer starts 1.5s after the shimmer and its cycle is longer, so the two
+   never lock into step. Both sit beneath the card's text. */
+@property --k-glimmer { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.k-metal::before,
+.k-metal::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+.k-metal::before {
+  background: linear-gradient(105deg, transparent 38%, rgba(240, 226, 196, .10) 50%, transparent 62%);
+  transform: translateX(-100%);
+  animation: k-shimmer 9s ease-in-out infinite;
+}
+.k-metal::after {
+  border-radius: 17px;
+  padding: 1px;
+  background: conic-gradient(from var(--k-glimmer), transparent 0deg, transparent 160deg, rgba(216, 194, 154, .10) 265deg, rgba(228, 208, 168, .50) 350deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  animation: k-glimmer 9.5s linear 1.5s infinite;
+}
+@keyframes k-shimmer {
+  0% { transform: translateX(-100%); }
+  33.33%, 100% { transform: translateX(100%); }
+}
+@keyframes k-glimmer {
+  0% { --k-glimmer: 0deg; opacity: 0; }
+  1% { opacity: 1; }
+  14.8% { opacity: 1; }
+  15.79%, 100% { --k-glimmer: 360deg; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .k-metal::before, .k-metal::after { animation: none; opacity: 0; }
+}
 .k-engrave { color: rgba(242, 237, 228, .86); text-shadow: 0 -1px 0 rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.06); }
 
 /* The working light — the Concierge's signature "thinking" sweep */
@@ -208,6 +244,13 @@
 .k-btn-primary   { background: var(--ivory); color: var(--ink-0); }
 .k-btn-commit    { background: var(--champagne); color: var(--ink-0); }
 .k-btn-secondary { background: var(--glass-light); color: var(--ivory); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+/* Frosted glass on a photograph: translucent white, blurred, light-edged. The
+   doubled selector outranks the `.k-light .k-photo .k-btn-*` tone overrides. */
+.k-btn.k-btn-glass.k-btn-glass {
+  background: rgba(255, 255, 255, .14); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .34);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+}
 .k-btn-ghost     { background: transparent; color: var(--ivory); border: 1px solid var(--line-2); }
 .k-btn-paper     { background: var(--paper-ink); color: var(--paper); }
 .k-btn-sm { height: 40px; padding: 0 16px; font-size: 14px; gap: 8px; }
@@ -296,6 +339,8 @@
   color: var(--ivory-3); font-family: var(--f-sans); font-weight: 500; font-size: 11px; line-height: 13px; letter-spacing: 0.01em;
 }
 .k-tab.is-active { color: var(--ivory); }
+/* On the grey glass bar the default muted tone is too faint; lift it a step. */
+.k-tabbar .k-tab:not(.is-active) { color: rgba(242, 237, 228, .74); }
 .k-tab .k-tab-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--champagne); }
 .k-orb {
   justify-self: center; display: flex; align-items: center; justify-content: center;
@@ -335,6 +380,26 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 16px 40px rgba(0, 0, 0, .5);
 }
 
+/* Frosted glass for controls that sit on a photograph (the home hero's search
+   and starting points): translucent white, blurred, light-edged, white type.
+   Selectors are doubled to outrank `.k-light .k-dark .k-composer` further down. */
+.k-dark.k-hero-glass .k-composer.k-composer,
+.k-dark.k-hero-glass .k-chip.k-chip {
+  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .34);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  color: #FFFFFF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 8px 24px rgba(0, 0, 0, .16);
+}
+.k-dark.k-hero-glass .k-chip { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); }
+.k-dark.k-hero-glass .k-icon-btn.k-icon-btn {
+  background: rgba(255, 255, 255, .20);
+  border: 1px solid rgba(255, 255, 255, .36);
+  color: #FFFFFF;
+}
+.k-dark.k-hero-glass .k-composer .t-body { color: rgba(255, 255, 255, .78); }
+
 /* Message bubbles */
 .k-msg-member { align-self: flex-end; max-width: 300px; padding: 12px 16px; border-radius: 22px 22px 6px 22px; background: var(--ink-4); color: var(--ivory); font-size: 16px; line-height: 23px; }
 .k-msg-concierge { align-self: flex-start; max-width: 342px; color: var(--ivory); font-size: 16px; line-height: 25px; }
@@ -354,6 +419,12 @@
   position: relative; height: 420px; overflow: hidden; touch-action: none;
   border-radius: var(--r-lg); background: var(--ink-1); border: 1px solid var(--line);
 }
+/* `fill`: the map takes the rest of the screen and runs off its bottom edge, so
+   only the top corners are rounded and the controls clear the home indicator. */
+.wm--fill { flex: 1 1 auto; min-height: 0; }
+.wm--fill .wm-box { flex: 1 1 auto; height: auto; min-height: 360px; border-radius: var(--r-lg) var(--r-lg) 0 0; border-bottom: 0; }
+.wm--fill .wm-controls { bottom: calc(12px + env(safe-area-inset-bottom)); }
+.wm--fill .wm-hint { bottom: calc(14px + env(safe-area-inset-bottom)); }
 .wm-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .wm-land { fill: #141416; stroke: rgba(242,237,228,.09); stroke-width: .75px; }
 .wm-land--covered { fill: #1D1D20; stroke: rgba(242,237,228,.16); }
@@ -555,10 +626,14 @@
    a 72%-black capsule over ivory is a grey smear, and the labels went with
    it. This is also where the app gets its black in between — one dark object
    held constant on every screen. */
+/* Dark grey glass. Lighter than the ground on black (grey over black, with a
+   light edge); still deep on ivory, because the fill is mostly opaque. */
 .k-tabbar.k-dark {
-  background: rgba(13, 13, 15, .93);
-  border-color: rgba(255, 255, 255, .10);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 16px 40px rgba(25, 22, 19, .28);
+  background: rgba(40, 40, 45, .88);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  border-color: rgba(255, 255, 255, .26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 16px 40px rgba(25, 22, 19, .28);
 }
 .k-light .k-tabbar.k-dark { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09), 0 14px 36px rgba(25, 22, 19, .22); }
 
@@ -617,6 +692,23 @@
   box-shadow: 0 1px 2px rgba(25, 22, 19, .04);
 }
 
+/* Tara's chat on obsidian: every message is a white bubble with dark type. */
+.k-chat-dark .k-msg-member {
+  background: #FFFFFF;
+  color: #191613;
+  padding: 12px 16px;
+}
+/* Tara's replies are frosted glass: translucent, blurred, grey-outlined, white type. */
+.k-chat-dark .k-msg-concierge {
+  padding: 12px 16px;
+  border-radius: 22px 22px 22px 6px;
+  background: rgba(84, 84, 90, .55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(18px) saturate(1.1);
+  border: 1px solid rgba(190, 190, 196, .32);
+  color: #FFFFFF;
+}
+
 /* ---- Carousel dots ------------------------------------------------------
    A 44px target around a 6px mark: the dot is the thing you see, not the
    thing you have to hit. */
@@ -629,3 +721,9 @@
 .k-carousel-dot[data-on] { width: 22px; border-radius: 999px; background: var(--champagne); }
 .k-carousel-dot::before { content: ''; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 @media (prefers-reduced-motion: reduce) { .k-carousel-dot { transition: none; } }
+
+/* Enquiry fields on the dark ground: the idle (empty) text is a light grey. */
+.k-glass-input::placeholder {
+  color: #c3c3c9;
+  opacity: 1;
+}

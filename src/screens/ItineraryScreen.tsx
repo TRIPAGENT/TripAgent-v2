@@ -171,7 +171,7 @@ export default function ItineraryScreen() {
   }
 
   return (
-    <Screen tone="light" tabs={false} dock wide>
+    <Screen tone="light" tabs={false} dock>
       <nav className="pv-app-nav" style={{ maxWidth: 900, margin: '0 auto', padding: '16px 24px 0' }}><Link to="/journeys" className="pv-back">← Your journeys</Link></nav>
 
       <Itinerary

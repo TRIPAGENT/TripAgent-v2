@@ -93,11 +93,13 @@ export async function signInWithCode(code: string): Promise<SessionMember> {
   } catch {
     throw new AgentError('We cannot reach the Desk from this device. Check the connection and try again.')
   }
-  const body = (await res.json().catch(() => ({}))) as { member?: SessionMember; token?: string; expiresAt?: string; error?: string }
+  const body = (await res.json().catch(() => ({}))) as { member?: SessionMember; token?: string; expiresAt?: string | number; error?: string }
   if (!res.ok || !body.member || !body.token || !body.expiresAt) {
     throw new AgentError(body.error ?? 'We could not open the door just now. Try again in a moment.', res.status !== 401)
   }
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ token: body.token, expiresAt: body.expiresAt }))
+  // The Node agent sends the expiry as an ISO date; the Python agent as epoch milliseconds. Keep ISO.
+  const expiresAt = typeof body.expiresAt === 'number' ? new Date(body.expiresAt).toISOString() : body.expiresAt
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ token: body.token, expiresAt }))
   return body.member
 }
 

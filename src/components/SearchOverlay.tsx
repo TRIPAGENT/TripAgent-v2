@@ -87,7 +87,7 @@ export function SearchOverlay({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'var(--ink-0)' }}>
+    <div className="app-frame-fixed z-50 flex flex-col" style={{ background: 'var(--ink-0)' }}>
       {/* --------------------------------------------------------- the field */}
       <header
         className="flex items-center gap-4 px-4 pb-3"

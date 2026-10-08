@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { Screen, TopBar } from '@/components/Shell'
 import { Headline, Sig } from '@/components/ui'
-import { WorldMap } from '@/components/WorldMap'
+// import { WorldMap } from '@/components/WorldMap' // the previous map, kept for reference
+import WorldMapDark from '@/components/worldmap/WorldMap'
 import { CITIES } from '@/data/catalogue.generated'
 
 /**
@@ -14,8 +15,21 @@ export default function WorldMapScreen() {
   const navigate = useNavigate()
 
   return (
-    <Screen tabs={false}>
-      <TopBar back="/" solid />
+    <Screen tabs={false} flush className="flex min-h-dvh flex-col">
+      <TopBar
+        back="/"
+        solid
+        actions={
+          <button
+            type="button"
+            className="k-btn k-btn-commit"
+            style={{ height: 44, padding: '0 18px', fontSize: 14 }}
+            onClick={() => navigate('/concierge')}
+          >
+            Talk to Tara
+          </button>
+        }
+      />
 
       <header className="px-6 pt-[124px]">
         <Headline size="l">
@@ -26,20 +40,22 @@ export default function WorldMapScreen() {
         </p>
       </header>
 
-      <div className="mt-8" onClickCapture={() => undefined}>
-        <WorldMap />
+      {/* Previous map:
+      <div className="mt-8 flex flex-1 flex-col" onClickCapture={() => undefined}>
+        <WorldMap fill />
       </div>
+      */}
 
-      <p className="t-caption c-ivory-3 mt-8 px-6">
-        Somewhere you do not see here? Tara can still open it.{' '}
-        <button
-          type="button"
-          className="k-link k-link-champagne align-baseline"
-          onClick={() => navigate('/concierge')}
-        >
-          Ask
-        </button>
-      </p>
+      {/* The dark world map fills its parent, so the parent is given the rest of the screen. */}
+      <div className="wm-dark relative mt-6 flex-1" style={{ minHeight: 420 }}>
+        <div className="absolute inset-0 flex flex-col">
+          <WorldMapDark
+            onNavigate={(href) => navigate(href)}
+            getCityHref={(slug) => `/city/${slug}`}
+            resolveImage={(path) => `/img/map/${path.split('?')[0].split('/').pop()!.replace(/\.[a-z]+$/i, '')}.webp`}
+          />
+        </div>
+      </div>
     </Screen>
   )
 }

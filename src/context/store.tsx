@@ -267,7 +267,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     {member && !ready ? <main style={{ minHeight: '100dvh', display: 'grid', placeContent: 'center', padding: 24, textAlign: 'center' }}>
       <p role="status">{restoreError ? 'We could not load your saved journeys and conversation. Your account data has not been changed.' : 'Opening your journeys and conversation…'}</p>
       {restoreError && <><button onClick={() => setAttempt(n => n + 1)}>Try again</button><button onClick={signOut}>Sign out</button></>}
-    </main> : <>{syncError && <div role="status" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, background: '#fff3d6', color: '#302516', padding: 10, textAlign: 'center' }}>We couldn’t sync your latest changes. Keep this page open while we retry.</div>}{children}</>}
+    </main> : <>{syncError && <div role="status" style={{ position: 'fixed', top: 0, left: '50%', width: 'min(100%, 430px)', transform: 'translateX(-50%)', zIndex: 1000, background: '#fff3d6', color: '#302516', padding: 10, textAlign: 'center' }}>We couldn’t sync your latest changes. Keep this page open while we retry.</div>}{children}</>}
   </StoreContext.Provider>
 }
 

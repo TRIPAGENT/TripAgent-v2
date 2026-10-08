@@ -5,6 +5,7 @@ import { useStore } from '@/context/store'
 import { brandImage } from '@/lib/catalogue'
 import { ADVISOR, DESK, isValidCode, normaliseCode } from '@/data/members'
 import { signInWithCode } from '@/lib/agentClient'
+import { tierLabel } from '@/lib/format'
 import type { Member } from '@/lib/types'
 
 type Step = 'code' | 'welcome'
@@ -307,8 +308,6 @@ export default function SignIn() {
           paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
         }}
       >
-        <span className="k-status k-status-ok">Invitation recognised</span>
-
         {/* The membership card, as an object */}
         <figure
           className="mt-8 w-full"
@@ -352,7 +351,7 @@ export default function SignIn() {
               <Seal size={36} />
             </div>
             <div className="relative flex flex-col gap-1.5">
-              <span className="t-label c-champagne">{resolved.tier}</span>
+              <span className="t-label c-champagne">{tierLabel(resolved.tier)}</span>
               <span
                 className="k-engrave truncate"
                 style={{ fontFamily: 'var(--f-display)', fontSize: 22, lineHeight: '28px', letterSpacing: '0.01em' }}

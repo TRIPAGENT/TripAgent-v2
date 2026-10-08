@@ -13,7 +13,7 @@ export default function ItineraryPreview() {
     try { await navigator.clipboard.writeText(window.location.href); setCopied(true) }
     catch { setMessage('Copy this page’s address to share the preview after signing in.') }
   }
-  return <Screen tone="light" tabs={false} dock wide>
+  return <Screen tone="light" tabs={false} dock>
     <div className="px-6 py-4" style={{ background: 'var(--ink-1)' }}>
       <Link to="/journeys" className="k-link mb-3">← Your journeys</Link>
       <p className="t-label">Sample itinerary</p>

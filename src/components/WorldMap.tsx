@@ -65,7 +65,7 @@ const project = (c: CitySummary): [number, number] | null =>
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
-export function WorldMap() {
+export function WorldMap({ fill = false }: { fill?: boolean } = {}) {
   const navigate = useNavigate()
   const { setActiveCity } = useStore()
   const box = useRef<HTMLDivElement>(null)
@@ -318,7 +318,7 @@ export function WorldMap() {
   }
 
   return (
-    <div className="wm">
+    <div className={`wm ${fill ? 'wm--fill' : ''}`}>
       <div className="wm-tabs" role="group" aria-label="Regions">
         <button
           type="button"

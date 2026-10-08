@@ -9,13 +9,34 @@
    screen starts dark even before its own styles arrive.
    ========================================================================== */
 @layer base {
+  :root { --app-w: 430px; }
   html, body { width: 100%; margin: 0; padding: 0; }
-  html { background: #0A0A0B; color-scheme: dark; }
+  /* Phone-only app: the screen is a fixed-width column on a static neutral
+     backdrop. The backdrop is the same at every window size. */
+  html { background: #1c1c1e; color-scheme: dark; }
+  #root {
+    position: relative;
+    width: 100%;
+    max-width: var(--app-w);
+    min-height: 100%;
+    margin: 0 auto;
+    background: var(--ink-0);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 0 48px rgba(0, 0, 0, .45);
+  }
+  /* Overlays cover the phone column, never the backdrop beside it. */
+  .app-frame-fixed {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: min(100%, var(--app-w));
+    transform: translateX(-50%);
+  }
   body {
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: var(--ink-0);
+    background: transparent;
     color: var(--ivory);
     font-family: var(--f-sans);
     font-size: 16px;
@@ -112,7 +133,7 @@
   @keyframes caret-blink { 50% { opacity: 0; } }
 
   /* Splash: the wordmark, then the door */
-  .splash { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--ink-0); color: var(--ivory); transition: opacity .7s ease, visibility .7s; }
+  .splash { position: fixed; top: 0; bottom: 0; left: 50%; width: min(100%, var(--app-w)); transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--ink-0); color: var(--ivory); transition: opacity .7s ease, visibility .7s; }
   .splash.is-done { opacity: 0; visibility: hidden; }
   /* The mark leads, the name follows, the line fills. The old type rules here
      fought the wordmark's own, so the class is now only a rise animation. */
@@ -126,4 +147,22 @@
 
 @media (prefers-reduced-motion: reduce) {
   .kenburns, .rise > *, .page-in, .sheet-in, .fade-in, .plate.is-loaded, .caret-blink { animation: none; }
+}
+
+/* The dark world map (components/worldmap). Its tokens are scoped to the
+   wrapper so they do not touch the app's own --ink / --line / --paper. */
+.wm-dark {
+  --ink: #f1ece3;
+  --ink-soft: #b6afa3;
+  --paper: #14110d;
+  --paper-2: #1c1813;
+  --stone: #968f84;
+  --line: #332d24;
+  --signature: rgba(216, 194, 154, 0.38); /* the active region outline: a soft beige, not a bold gold */
+  --fr: var(--f-sans);
+  --serif: var(--f-display);
+  --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
+  --shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 24px 56px rgba(0, 0, 0, 0.45);
+  --shadow-dark: 0 2px 28px rgba(0, 0, 0, 0.4);
 }

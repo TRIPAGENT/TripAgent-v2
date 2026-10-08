@@ -1,17 +1,23 @@
+/*
+ * KEPT FOR REFERENCE, NOT ROUTED. This is the Tara chat screen as it was built and designed on this
+ * machine. The app's /concierge route now renders the chatbot-fe chat (src/chatbot-fe), with this
+ * screen's design and behaviour applied on top of it. Re-enable it in src/App.tsx if ever needed.
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useChatRuntime } from '@/context/chatRuntime'
-import { chatAcknowledgement } from '@/lib/chatAcknowledgement'
 import { CHAT_SUGGESTIONS, addSuggestionToDraft } from '@/lib/chatSuggestions'
 import { planKeyFrom } from '@/lib/planLinks'
 import { Screen } from '@/components/Shell'
-import { AgentMark, Btn, Card, Horizon, Icon } from '@/components/ui'
+import { AgentMark, BackButton, Btn, Card, Horizon, Icon } from '@/components/ui'
 import { useStore, type Preferences } from '@/context/store'
 import { useThinkingWord } from '@/lib/useThinking'
 import { CITY_BY_SLUG } from '@/data/catalogue.generated'
 import { parseItemKey } from '@/lib/itinerary'
 import { greeting, msg, respond } from '@/lib/concierge'
 import { clock } from '@/lib/format'
+import { MeshBackdrop } from '@/components/mesh/MeshBackdrop'
+import { TARA_COLORS, TARA_TUNING } from '@/components/mesh/presets'
 import {
   AgentError,
   agentHealth,
@@ -424,7 +430,13 @@ export default function Concierge() {
   let lastDay = 0
 
   return (
-    <Screen tone="light" tabs>
+    <Screen tone="dark" tabs={false} flush className="isolate k-chat-dark">
+      <MeshBackdrop
+        id="tara-mesh"
+        colors={TARA_COLORS}
+        tuning={TARA_TUNING}
+        fallback="radial-gradient(75% 40% at 85% 12%, rgba(83,102,122,.7) 0%, rgba(83,102,122,0) 70%), radial-gradient(85% 40% at 40% 50%, rgba(154,90,48,.7) 0%, rgba(154,90,48,0) 70%), #080605"
+      />
       {/* The empty room gets one warm wash from above and nothing else. The
           champagne hairline this used to carry was drawn for obsidian; on
           ivory it reads as a stray rule struck through the greeting. */}
@@ -447,10 +459,25 @@ export default function Concierge() {
           top: 0,
           paddingTop: 'max(54px, calc(env(safe-area-inset-top) + 12px))',
           paddingBottom: 12,
-          background: 'linear-gradient(180deg, var(--ink-0) 68%, rgba(10,10,11,0) 100%)',
         }}
       >
-        <span className="w-11 shrink-0" />
+        {/* Frosted glass: messages blur and fade out beneath the header instead
+            of running through the title. A separate layer, so the buttons and
+            title are not masked with it. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 right-0 top-0"
+          style={{
+            zIndex: -1,
+            bottom: -20,
+            background: 'linear-gradient(180deg, rgba(8,6,5,.50) 0%, rgba(8,6,5,.38) 60%, rgba(8,6,5,0) 100%)',
+            backdropFilter: 'blur(20px) saturate(1.15)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.15)',
+            maskImage: 'linear-gradient(180deg, #000 0%, #000 66%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 66%, transparent 100%)',
+          }}
+        />
+        <BackButton solid onClick={() => (location.key === 'default' ? navigate('/') : navigate(-1))} />
         <div className="min-w-0 flex-1 text-center">
           <AgentMark className="justify-center" />
           <p className="t-caption c-ivory-3 flex items-center justify-center gap-2 truncate">
@@ -580,11 +607,12 @@ export default function Concierge() {
 
       {/* The thread */}
       <div className="flex flex-col gap-4 px-6 pt-4" style={{ paddingBottom: 96 }}>
-        {displayChat.map((m) => {
+        {displayChat.map((m, index) => {
           const day = startOfDay(m.at)
           const divider = day !== lastDay
           lastDay = day
-          const acknowledgement = chatAcknowledgement(m, runtime.job)
+          // Tara is named once, above the first bubble of a run of replies.
+          const firstOfRun = divider || displayChat[index - 1]?.role !== 'ai'
 
           return (
             <div key={m.id} className="flex flex-col gap-4">
@@ -599,11 +627,6 @@ export default function Concierge() {
               {m.role === 'member' ? (
                 <div className="flex flex-col items-end gap-1.5">
                   <p className="k-msg-member whitespace-pre-wrap">{m.text}</p>
-                  {acknowledgement && <p className="t-caption c-ivory-3 flex items-center gap-1.5" role="status" aria-label={acknowledgement.label}>
-                    <span aria-hidden="true" className="inline-flex items-center justify-center rounded-full px-2 py-1" style={{ background: 'var(--champagne-3)', border: '1px solid var(--champagne-line)' }}>{acknowledgement.emoji}</span>
-                    <span>{acknowledgement.label}</span>
-                    {acknowledgement.working && <span aria-hidden="true" className="k-breathe inline-block h-1.5 w-1.5 rounded-full" style={{ background: 'var(--champagne)' }} />}
-                  </p>}
                   {m.delivery === 'unconfirmed' && <button type="button" className="k-link t-caption" style={{ minHeight: 44 }} onClick={() => { setDraft(m.text); composerRef.current?.focus() }}>Review and resend</button>}
                 </div>
               ) : m.role === 'advisor' ? (
@@ -613,13 +636,15 @@ export default function Concierge() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <p className="t-caption flex items-center gap-2">
-                    <Horizon size={18} />
-                    Tara
-                  </p>
+                  {firstOfRun && (
+                    <p className="t-caption flex items-center gap-2">
+                      <Horizon size={18} />
+                      Tara
+                    </p>
+                  )}
                   <p
                     className="k-msg-concierge whitespace-pre-wrap"
-                    style={m.failed ? { color: 'var(--amber)' } : undefined}
+                    style={m.failed ? { color: '#F2B879' } : undefined}
                   >
                     {m.text}
                   </p>
@@ -710,10 +735,12 @@ export default function Concierge() {
         {/* Speaking */}
         {thinking && !activity && (
           <div className="flex flex-col gap-2">
-            <p className="t-caption flex items-center gap-2">
-              <Horizon size={18} working />
-              Tara
-            </p>
+            {displayChat[displayChat.length - 1]?.role !== 'ai' && (
+              <p className="t-caption flex items-center gap-2">
+                <Horizon size={18} working />
+                Tara
+              </p>
+            )}
             {partial ? (
               <p className="k-msg-concierge whitespace-pre-wrap">
                 {partial}
@@ -736,24 +763,24 @@ export default function Concierge() {
 
         {!thinking && displayChat.some(message => message.role === 'ai' && !message.failed) && <section aria-label="Explore travel options" className="flex flex-col gap-2.5 pt-3">
           <p className="t-caption c-ivory-3">Explore with Tara</p>
-          <div className="flex flex-wrap gap-2">
-            {CHAT_SUGGESTIONS.map(suggestion => <button key={suggestion.label} type="button" className="k-chip" style={{ minHeight: 44, padding: '0 14px' }} onClick={() => {
+          {/* One line, scrolling sideways; bleeds to the screen edges so the next chip is seen to continue. */}
+          <div className="-mx-6 flex gap-2 overflow-x-auto px-6" style={{ scrollbarWidth: 'none' }}>
+            {CHAT_SUGGESTIONS.map(suggestion => <button key={suggestion.label} type="button" className="k-chip shrink-0" style={{ height: 28, padding: '0 12px' }} onClick={() => {
               setDraft(current => addSuggestionToDraft(current, suggestion.prompt)); composerRef.current?.focus()
             }}>{suggestion.label}<Icon name="arrow-up-right" size={14} /></button>)}
           </div>
-          <p className="t-caption c-ivory-3">Compare a few options, then shape the trip together.</p>
         </section>}
         <div ref={endRef} />
       </div>
 
       {/* Composer */}
       <div
-        /* Chrome, like the tab bar: obsidian on either ground. */
+        /* Chrome: obsidian on either ground. The tab bar is hidden in this room, so the composer sits at the bottom edge. */
         className="k-dark fixed z-40"
         style={{
-          left: 'max(16px, calc(50% - 224px))',
-          right: 'max(16px, calc(50% - 224px))',
-          bottom: 'calc(max(20px, env(safe-area-inset-bottom)) + 76px)',
+          left: 'max(16px, calc(50% - 199px))',
+          right: 'max(16px, calc(50% - 199px))',
+          bottom: 'max(16px, env(safe-area-inset-bottom))',
           background: 'transparent',
         }}
       >
@@ -773,9 +800,9 @@ export default function Concierge() {
               onClick={toggleListening}
               className="k-icon-btn"
               style={{
-                background: 'transparent',
+                background: listening ? 'var(--champagne)' : '#D6D6DA',
                 borderColor: 'transparent',
-                color: listening ? 'var(--champagne)' : 'var(--ivory-2)',
+                color: '#1B1B1E',
               }}
             >
               <Icon name={listening ? 'waveform' : 'mic'} size={20} />
@@ -802,34 +829,19 @@ export default function Concierge() {
             style={{
               width: 44,
               height: 44,
-              background: draft.trim() && !runtime.submitting ? 'var(--ivory)' : 'var(--ink-4)',
-              color: draft.trim() && !runtime.submitting ? 'var(--ink-0)' : 'var(--ivory-3)',
+              background: '#D6D6DA',
+              color: '#1B1B1E',
+              opacity: draft.trim() && !runtime.submitting ? 1 : 0.5,
             }}
           >
             <Icon name="send" size={20} />
           </button>
         </form>
 
-        {import.meta.env.DEV ? (
-          <div className="mt-2 flex items-center justify-between px-2">
-            <span className="t-mono c-ivory-3">
-              {live ? 'Agent · memory on' : 'On-device stand-in · no memory'}
-            </span>
-            <span className="t-mono c-ivory-3">
-              {live
-                ? health?.researchReady
-                  ? 'Research on'
-                  : 'Research off'
-                : 'Start the backend to go live'}
-            </span>
-          </div>
-        ) : (
-          !live &&
-          health !== undefined && (
-            <p className="t-caption c-ivory-3 mt-2 text-center">
-              Tara is not reachable from this device just now.
-            </p>
-          )
+        {!live && health !== undefined && (
+          <p className="t-caption c-ivory-3 mt-2 text-center">
+            Tara is not reachable from this device just now.
+          </p>
         )}
       </div>
     </Screen>

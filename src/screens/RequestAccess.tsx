@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Btn, Icon, Photo, Sig } from '@/components/ui'
+import { BackButton, Btn, Icon, Photo, Sig } from '@/components/ui'
 import { brandImage } from '@/lib/catalogue'
 import { requestAccess } from '@/lib/agentClient'
 import { DESK } from '@/data/members'
@@ -59,14 +59,7 @@ export default function RequestAccess() {
           className="flex items-center"
           style={{ paddingTop: 'max(54px, calc(env(safe-area-inset-top) + 12px))', height: 44 }}
         >
-          <button
-            type="button"
-            aria-label="Back to the door"
-            onClick={() => navigate('/signin')}
-            className="k-icon-btn"
-          >
-            <Icon name="back" size={20} />
-          </button>
+          <BackButton label="Back to the door" onClick={() => navigate('/signin')} />
         </header>
 
         {sent ? (

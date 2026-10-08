@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Btn, Cred, Empty, Icon, Sheet } from '@/components/ui'
+import { BackButton, Btn, Cred, Empty, Icon, Sheet } from '@/components/ui'
 import { CITY_BY_SLUG } from '@/data/catalogue.generated'
 import { loadMap, type CityMap as CityMapData, type Venue } from '@/lib/catalogue'
 import { itemKey, savedItemKey } from '@/lib/itinerary'
@@ -314,14 +314,7 @@ export default function CityMapScreen() {
         className="absolute left-4 right-4 z-20 flex items-center justify-between gap-3"
         style={{ top: 'max(54px, calc(env(safe-area-inset-top) + 12px))', height: 44 }}
       >
-        <button
-          type="button"
-          aria-label={`Back to the ${cityName} guide`}
-          onClick={() => navigate(`/city/${slug}`)}
-          className="k-icon-btn"
-        >
-          <Icon name="back" size={20} />
-        </button>
+        <BackButton label={`Back to the ${cityName} guide`} onClick={() => navigate(`/city/${slug}`)} />
         <h1
           className="k-glass flex min-w-0 items-center gap-2 px-4"
           style={{ height: 44, borderRadius: 999 }}

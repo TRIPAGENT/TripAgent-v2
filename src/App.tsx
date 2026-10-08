@@ -20,7 +20,11 @@ const WorldMapScreen = lazy(() => import('@/screens/WorldMapScreen'))
 import Saved from '@/screens/Saved'
 import Journeys from '@/screens/Journeys'
 import Itinerary from '@/screens/ItineraryScreen'
-import Concierge from '@/screens/Concierge'
+// The Tara chat screen as designed locally. Kept for reference, switched off: the route below now uses
+// the chatbot-fe chat (src/chatbot-fe) with the same design applied on top. To bring it back, restore
+// this import and the commented route.
+// import Concierge from '@/screens/Concierge'
+import ChatbotScreen from '@/chatbot-fe/ChatbotScreen'
 import BookingRequest from '@/screens/BookingRequest'
 import Status from '@/screens/Status'
 import Quote from '@/screens/Quote'
@@ -72,7 +76,8 @@ export default function App() {
           ['/preview/itinerary', <ItineraryPreview key="preview" />],
           ['/journeys', <Journeys key="j" />],
           ['/journeys/:key', <Itinerary key="it" />],
-          ['/concierge', <Concierge key="co" />],
+          // ['/concierge', <Concierge key="co" />],
+          ['/concierge', <ChatbotScreen key="co" />],
           ['/booking-request', <BookingRequest key="b" />],
           ['/status', <Status key="s" />],
           ['/settlement', <Quote key="q" />],

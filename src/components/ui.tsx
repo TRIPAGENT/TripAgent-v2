@@ -423,7 +423,7 @@ export function Sheet({
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="app-frame-fixed z-50 flex items-end justify-center">
       <button
         type="button"
         aria-label="Close"
@@ -640,6 +640,39 @@ export function Track({ value = 1, className = '' }: { value?: number; className
   )
 }
 
+/**
+ * The one back control. A 44px round button with a left chevron, in the top-left
+ * corner of a screen (top: max(54px, safe area + 12px), left: 16px, on the same
+ * line as the screen's other top buttons). `solid` for a plain ground, glass over
+ * a photograph or a map. Every screen's way back is this, so it looks and sits
+ * the same everywhere.
+ */
+export function BackButton({
+  onClick,
+  label = 'Back',
+  solid = false,
+  disabled = false,
+  className = '',
+}: {
+  onClick: () => void
+  label?: string
+  solid?: boolean
+  disabled?: boolean
+  className?: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={`k-icon-btn shrink-0 ${solid ? 'k-icon-btn-solid' : ''} ${disabled ? 'opacity-30' : ''} ${className}`}
+    >
+      <Icon name="chevron-left" size={20} />
+    </button>
+  )
+}
+
 /** The back bar of a task screen, kept for older call sites. */
 export function BackBar({ title, status, onBack }: { title: string; status?: ReactNode; onBack?: () => void }) {
   const navigate = useNavigate()
@@ -650,7 +683,7 @@ export function BackBar({ title, status, onBack }: { title: string; status?: Rea
         className="flex items-center gap-3 t-title-s"
         onClick={() => (onBack ? onBack() : navigate(-1))}
       >
-        <Icon name="back" size={18} />
+        <Icon name="chevron-left" size={18} />
         {title}
       </button>
       {status}
@@ -788,12 +821,15 @@ export function Disclosure({
 export function PhotoCarousel({
   slides,
   interval = 6500,
+  dots = true,
   className = '',
   style,
   children,
 }: {
   slides: { src: string; alt: string; position?: string }[]
   interval?: number
+  /** The row of picker dots under the photograph. */
+  dots?: boolean
   className?: string
   style?: CSSProperties
   children?: ReactNode
@@ -843,10 +879,10 @@ export function PhotoCarousel({
         />
       ))}
       <span className="k-veil-top" aria-hidden="true" />
-      <span className="k-veil-bottom" aria-hidden="true" />
+      <span className="k-veil-bottom" aria-hidden="true" style={{ height: '78%' }} />
       {children}
 
-      {slides.length > 1 ? (
+      {dots && slides.length > 1 ? (
         <div
           className="absolute left-0 right-0 z-[6] flex items-center justify-center gap-2"
           style={{ bottom: 14 }}

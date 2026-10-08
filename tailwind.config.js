@@ -74,7 +74,7 @@ export default {
         measure: '62ch',
         lead: '52ch',
         quote: '46ch',
-        app: '480px',
+        app: '430px',
       },
     },
   },

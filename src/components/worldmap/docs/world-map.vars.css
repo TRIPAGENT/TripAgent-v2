@@ -1,0 +1,25 @@
+/* Design tokens WorldMap.module.css reads. Skip this file if your project
+   already defines them; otherwise import it once (e.g. in your app entry). */
+:root {
+  --ink: #1a1714;
+  --ink-soft: #3e3a35;
+  --paper: #ffffff;
+  --paper-2: #fafaf8;
+  --stone: #5f5f5f;
+  --line: #e7e6e2;
+  --signature: #6e2a38; /* accent: active tab / region highlight */
+  --fr: "Plus Jakarta Sans", "Inter", system-ui, sans-serif; /* UI font */
+  --serif: "Cormorant Garamond", Georgia, serif; /* region name labels */
+  --ease: cubic-bezier(0.28, 0.11, 0.32, 1);
+  --shadow: 0 12px 34px rgba(22, 20, 16, 0.08);
+  --shadow-lg: 0 24px 56px rgba(22, 20, 16, 0.12);
+  --shadow-dark: 0 2px 28px rgba(0, 0, 0, 0.4);
+}
+:root[data-theme="dark"] {
+  --ink: #f1ece3;
+  --ink-soft: #b6afa3;
+  --paper: #14110d;
+  --paper-2: #1c1813;
+  --stone: #968f84;
+  --line: #332d24;
+}

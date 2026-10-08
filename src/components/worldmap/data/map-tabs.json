@@ -1,0 +1,1500 @@
+{
+  "world": {
+    "key": "world",
+    "label": "World",
+    "countries": [
+      "India",
+      "France",
+      "United Kingdom",
+      "Netherlands",
+      "Ireland",
+      "Iceland",
+      "Denmark",
+      "Switzerland",
+      "Austria",
+      "Croatia",
+      "Greece",
+      "Italy",
+      "Portugal",
+      "Spain",
+      "Czechia",
+      "Germany",
+      "Hungary",
+      "Jordan",
+      "Oman",
+      "Qatar",
+      "United Arab Emirates",
+      "Turkey",
+      "Bhutan",
+      "Maldives",
+      "Mauritius",
+      "Nepal",
+      "Seychelles",
+      "Sri Lanka",
+      "China",
+      "Hong Kong",
+      "Japan",
+      "South Korea",
+      "Taiwan",
+      "Cambodia",
+      "Indonesia",
+      "Malaysia",
+      "Singapore",
+      "Thailand",
+      "Vietnam",
+      "Egypt",
+      "Kenya",
+      "Morocco",
+      "South Africa",
+      "Tanzania",
+      "Canada",
+      "Mexico",
+      "United States of America",
+      "Argentina",
+      "Brazil",
+      "Peru",
+      "Australia",
+      "New Zealand"
+    ],
+    "cities": [
+      {
+        "slug": "dubai",
+        "name": "Dubai",
+        "lat": 25.2048,
+        "lon": 55.2708
+      },
+      {
+        "slug": "abu-dhabi",
+        "name": "Abu Dhabi",
+        "lat": 24.4539,
+        "lon": 54.3773
+      },
+      {
+        "slug": "doha",
+        "name": "Doha",
+        "lat": 25.2854,
+        "lon": 51.531
+      },
+      {
+        "slug": "muscat",
+        "name": "Muscat",
+        "lat": 23.588,
+        "lon": 58.3829
+      },
+      {
+        "slug": "amman-petra",
+        "name": "Amman & Petra",
+        "lat": 31.9539,
+        "lon": 35.9106
+      },
+      {
+        "slug": "singapore-city",
+        "name": "Singapore",
+        "lat": 1.3521,
+        "lon": 103.8198
+      },
+      {
+        "slug": "bangkok",
+        "name": "Bangkok",
+        "lat": 13.7563,
+        "lon": 100.5018
+      },
+      {
+        "slug": "phuket",
+        "name": "Phuket",
+        "lat": 7.8804,
+        "lon": 98.3923
+      },
+      {
+        "slug": "krabi",
+        "name": "Krabi",
+        "lat": 8.0863,
+        "lon": 98.9063
+      },
+      {
+        "slug": "bali",
+        "name": "Bali",
+        "lat": -8.6705,
+        "lon": 115.2126
+      },
+      {
+        "slug": "kuala-lumpur",
+        "name": "Kuala Lumpur",
+        "lat": 3.139,
+        "lon": 101.6869
+      },
+      {
+        "slug": "langkawi",
+        "name": "Langkawi",
+        "lat": 6.35,
+        "lon": 99.8
+      },
+      {
+        "slug": "hanoi",
+        "name": "Hanoi",
+        "lat": 21.0278,
+        "lon": 105.8342
+      },
+      {
+        "slug": "ho-chi-minh-city",
+        "name": "Ho Chi Minh City",
+        "lat": 10.8231,
+        "lon": 106.6297
+      },
+      {
+        "slug": "hoi-an",
+        "name": "Hoi An & Da Nang",
+        "lat": 15.8801,
+        "lon": 108.338
+      },
+      {
+        "slug": "siem-reap",
+        "name": "Siem Reap",
+        "lat": 13.3671,
+        "lon": 103.8448
+      },
+      {
+        "slug": "tokyo",
+        "name": "Tokyo",
+        "lat": 35.6762,
+        "lon": 139.6503
+      },
+      {
+        "slug": "kyoto",
+        "name": "Kyoto",
+        "lat": 35.0116,
+        "lon": 135.7681
+      },
+      {
+        "slug": "osaka",
+        "name": "Osaka",
+        "lat": 34.6937,
+        "lon": 135.5023
+      },
+      {
+        "slug": "hong-kong",
+        "name": "Hong Kong",
+        "lat": 22.3193,
+        "lon": 114.1694
+      },
+      {
+        "slug": "seoul",
+        "name": "Seoul",
+        "lat": 37.5665,
+        "lon": 126.978
+      },
+      {
+        "slug": "shanghai",
+        "name": "Shanghai",
+        "lat": 31.2304,
+        "lon": 121.4737
+      },
+      {
+        "slug": "taipei",
+        "name": "Taipei",
+        "lat": 25.033,
+        "lon": 121.5654
+      },
+      {
+        "slug": "male-maldives",
+        "name": "Malé & the Atolls",
+        "lat": 4.1755,
+        "lon": 73.5093
+      },
+      {
+        "slug": "colombo",
+        "name": "Colombo",
+        "lat": 6.9271,
+        "lon": 79.8612
+      },
+      {
+        "slug": "galle",
+        "name": "Galle",
+        "lat": 6.0535,
+        "lon": 80.221
+      },
+      {
+        "slug": "kathmandu",
+        "name": "Kathmandu",
+        "lat": 27.7172,
+        "lon": 85.324
+      },
+      {
+        "slug": "paro",
+        "name": "Paro & Thimphu",
+        "lat": 27.4287,
+        "lon": 89.4164
+      },
+      {
+        "slug": "mauritius-city",
+        "name": "Mauritius",
+        "lat": -20.1609,
+        "lon": 57.5012
+      },
+      {
+        "slug": "mahe-seychelles",
+        "name": "Mahé",
+        "lat": -4.6191,
+        "lon": 55.4513
+      },
+      {
+        "slug": "london",
+        "name": "London",
+        "lat": 51.5074,
+        "lon": -0.1278
+      },
+      {
+        "slug": "paris",
+        "name": "Paris",
+        "lat": 48.8566,
+        "lon": 2.3522
+      },
+      {
+        "slug": "nice-riviera",
+        "name": "Nice & the Riviera",
+        "lat": 43.7102,
+        "lon": 7.262
+      },
+      {
+        "slug": "amsterdam",
+        "name": "Amsterdam",
+        "lat": 52.3676,
+        "lon": 4.9041
+      },
+      {
+        "slug": "rome",
+        "name": "Rome",
+        "lat": 41.9028,
+        "lon": 12.4964
+      },
+      {
+        "slug": "milan",
+        "name": "Milan",
+        "lat": 45.4642,
+        "lon": 9.19
+      },
+      {
+        "slug": "venice",
+        "name": "Venice",
+        "lat": 45.4408,
+        "lon": 12.3155
+      },
+      {
+        "slug": "florence",
+        "name": "Florence",
+        "lat": 43.7696,
+        "lon": 11.2558
+      },
+      {
+        "slug": "amalfi-coast",
+        "name": "The Amalfi Coast",
+        "lat": 40.634,
+        "lon": 14.6027
+      },
+      {
+        "slug": "lake-como",
+        "name": "Lake Como",
+        "lat": 45.8081,
+        "lon": 9.0852
+      },
+      {
+        "slug": "barcelona",
+        "name": "Barcelona",
+        "lat": 41.3874,
+        "lon": 2.1686
+      },
+      {
+        "slug": "madrid",
+        "name": "Madrid",
+        "lat": 40.4168,
+        "lon": -3.7038
+      },
+      {
+        "slug": "lisbon",
+        "name": "Lisbon",
+        "lat": 38.7223,
+        "lon": -9.1393
+      },
+      {
+        "slug": "porto",
+        "name": "Porto",
+        "lat": 41.1579,
+        "lon": -8.6291
+      },
+      {
+        "slug": "athens",
+        "name": "Athens",
+        "lat": 37.9838,
+        "lon": 23.7275
+      },
+      {
+        "slug": "santorini",
+        "name": "Santorini",
+        "lat": 36.3932,
+        "lon": 25.4615
+      },
+      {
+        "slug": "mykonos",
+        "name": "Mykonos",
+        "lat": 37.4467,
+        "lon": 25.3289
+      },
+      {
+        "slug": "dubrovnik",
+        "name": "Dubrovnik",
+        "lat": 42.6507,
+        "lon": 18.0944
+      },
+      {
+        "slug": "zurich",
+        "name": "Zurich",
+        "lat": 47.3769,
+        "lon": 8.5417
+      },
+      {
+        "slug": "geneva",
+        "name": "Geneva",
+        "lat": 46.2044,
+        "lon": 6.1432
+      },
+      {
+        "slug": "zermatt",
+        "name": "Zermatt",
+        "lat": 46.0207,
+        "lon": 7.7491
+      },
+      {
+        "slug": "st-moritz",
+        "name": "St. Moritz",
+        "lat": 46.4983,
+        "lon": 9.8377
+      },
+      {
+        "slug": "vienna",
+        "name": "Vienna",
+        "lat": 48.2082,
+        "lon": 16.3738
+      },
+      {
+        "slug": "salzburg",
+        "name": "Salzburg",
+        "lat": 47.8095,
+        "lon": 13.055
+      },
+      {
+        "slug": "munich",
+        "name": "Munich",
+        "lat": 48.1351,
+        "lon": 11.582
+      },
+      {
+        "slug": "prague",
+        "name": "Prague",
+        "lat": 50.0755,
+        "lon": 14.4378
+      },
+      {
+        "slug": "edinburgh",
+        "name": "Edinburgh",
+        "lat": 55.9533,
+        "lon": -3.1883
+      },
+      {
+        "slug": "dublin",
+        "name": "Dublin",
+        "lat": 53.3498,
+        "lon": -6.2603
+      },
+      {
+        "slug": "reykjavik",
+        "name": "Reykjavik",
+        "lat": 64.1466,
+        "lon": -21.9426
+      },
+      {
+        "slug": "copenhagen",
+        "name": "Copenhagen",
+        "lat": 55.6761,
+        "lon": 12.5683
+      },
+      {
+        "slug": "budapest",
+        "name": "Budapest",
+        "lat": 47.4979,
+        "lon": 19.0402
+      },
+      {
+        "slug": "istanbul",
+        "name": "Istanbul",
+        "lat": 41.0082,
+        "lon": 28.9784
+      },
+      {
+        "slug": "cappadocia",
+        "name": "Cappadocia",
+        "lat": 38.6431,
+        "lon": 34.8286
+      },
+      {
+        "slug": "cairo",
+        "name": "Cairo",
+        "lat": 30.0444,
+        "lon": 31.2357
+      },
+      {
+        "slug": "marrakech",
+        "name": "Marrakech",
+        "lat": 31.6295,
+        "lon": -7.9811
+      },
+      {
+        "slug": "cape-town",
+        "name": "Cape Town",
+        "lat": -33.9249,
+        "lon": 18.4241
+      },
+      {
+        "slug": "nairobi-mara",
+        "name": "Nairobi & the Mara",
+        "lat": -1.2921,
+        "lon": 36.8219
+      },
+      {
+        "slug": "zanzibar",
+        "name": "Zanzibar",
+        "lat": -6.1659,
+        "lon": 39.2026
+      },
+      {
+        "slug": "new-york",
+        "name": "New York",
+        "lat": 40.7128,
+        "lon": -74.006
+      },
+      {
+        "slug": "los-angeles",
+        "name": "Los Angeles",
+        "lat": 34.0522,
+        "lon": -118.2437
+      },
+      {
+        "slug": "san-francisco",
+        "name": "San Francisco",
+        "lat": 37.7749,
+        "lon": -122.4194
+      },
+      {
+        "slug": "las-vegas",
+        "name": "Las Vegas",
+        "lat": 36.1699,
+        "lon": -115.1398
+      },
+      {
+        "slug": "miami",
+        "name": "Miami",
+        "lat": 25.7617,
+        "lon": -80.1918
+      },
+      {
+        "slug": "toronto",
+        "name": "Toronto",
+        "lat": 43.6532,
+        "lon": -79.3832
+      },
+      {
+        "slug": "vancouver",
+        "name": "Vancouver",
+        "lat": 49.2827,
+        "lon": -123.1207
+      },
+      {
+        "slug": "mexico-city",
+        "name": "Mexico City",
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "slug": "cancun",
+        "name": "Cancún",
+        "lat": 21.1619,
+        "lon": -86.8515
+      },
+      {
+        "slug": "rio-de-janeiro",
+        "name": "Rio de Janeiro",
+        "lat": -22.9068,
+        "lon": -43.1729
+      },
+      {
+        "slug": "buenos-aires",
+        "name": "Buenos Aires",
+        "lat": -34.6037,
+        "lon": -58.3816
+      },
+      {
+        "slug": "lima",
+        "name": "Lima",
+        "lat": -12.0464,
+        "lon": -77.0428
+      },
+      {
+        "slug": "cusco",
+        "name": "Cusco & Machu Picchu",
+        "lat": -13.532,
+        "lon": -71.9675
+      },
+      {
+        "slug": "sydney",
+        "name": "Sydney",
+        "lat": -33.8688,
+        "lon": 151.2093
+      },
+      {
+        "slug": "melbourne",
+        "name": "Melbourne",
+        "lat": -37.8136,
+        "lon": 144.9631
+      },
+      {
+        "slug": "auckland",
+        "name": "Auckland",
+        "lat": -36.8485,
+        "lon": 174.7633
+      },
+      {
+        "slug": "queenstown",
+        "name": "Queenstown",
+        "lat": -45.0312,
+        "lon": 168.6626
+      },
+      {
+        "slug": "delhi",
+        "name": "New Delhi",
+        "lat": 28.6139,
+        "lon": 77.209
+      },
+      {
+        "slug": "mumbai",
+        "name": "Mumbai",
+        "lat": 19.076,
+        "lon": 72.8777
+      },
+      {
+        "slug": "bengaluru",
+        "name": "Bengaluru",
+        "lat": 12.9716,
+        "lon": 77.5946
+      },
+      {
+        "slug": "goa",
+        "name": "Goa",
+        "lat": 15.4909,
+        "lon": 73.8278
+      },
+      {
+        "slug": "jaipur",
+        "name": "Jaipur",
+        "lat": 26.9124,
+        "lon": 75.7873
+      },
+      {
+        "slug": "udaipur",
+        "name": "Udaipur",
+        "lat": 24.5854,
+        "lon": 73.7125
+      },
+      {
+        "slug": "agra",
+        "name": "Agra",
+        "lat": 27.1767,
+        "lon": 78.0081
+      },
+      {
+        "slug": "jodhpur",
+        "name": "Jodhpur",
+        "lat": 26.2389,
+        "lon": 73.0243
+      },
+      {
+        "slug": "jaisalmer",
+        "name": "Jaisalmer",
+        "lat": 26.9157,
+        "lon": 70.9083
+      },
+      {
+        "slug": "ranthambore",
+        "name": "Ranthambore",
+        "lat": 26.0173,
+        "lon": 76.5026
+      },
+      {
+        "slug": "varanasi",
+        "name": "Varanasi",
+        "lat": 25.3176,
+        "lon": 82.9739
+      },
+      {
+        "slug": "rishikesh",
+        "name": "Rishikesh",
+        "lat": 30.0869,
+        "lon": 78.2676
+      },
+      {
+        "slug": "amritsar",
+        "name": "Amritsar",
+        "lat": 31.634,
+        "lon": 74.8723
+      },
+      {
+        "slug": "kochi",
+        "name": "Kochi",
+        "lat": 9.9312,
+        "lon": 76.2673
+      },
+      {
+        "slug": "munnar",
+        "name": "Munnar",
+        "lat": 10.0889,
+        "lon": 77.0595
+      },
+      {
+        "slug": "alleppey",
+        "name": "Alleppey",
+        "lat": 9.4981,
+        "lon": 76.3388
+      },
+      {
+        "slug": "shimla",
+        "name": "Shimla",
+        "lat": 31.1048,
+        "lon": 77.1734
+      },
+      {
+        "slug": "manali",
+        "name": "Manali",
+        "lat": 32.2432,
+        "lon": 77.1892
+      },
+      {
+        "slug": "leh-ladakh",
+        "name": "Leh-Ladakh",
+        "lat": 34.1526,
+        "lon": 77.5771
+      },
+      {
+        "slug": "srinagar",
+        "name": "Srinagar",
+        "lat": 34.0837,
+        "lon": 74.7973
+      },
+      {
+        "slug": "hyderabad",
+        "name": "Hyderabad",
+        "lat": 17.385,
+        "lon": 78.4867
+      },
+      {
+        "slug": "chennai",
+        "name": "Chennai",
+        "lat": 13.0827,
+        "lon": 80.2707
+      },
+      {
+        "slug": "kolkata",
+        "name": "Kolkata",
+        "lat": 22.5726,
+        "lon": 88.3639
+      },
+      {
+        "slug": "darjeeling",
+        "name": "Darjeeling",
+        "lat": 27.041,
+        "lon": 88.2663
+      },
+      {
+        "slug": "andaman",
+        "name": "Andaman Islands",
+        "lat": 11.6234,
+        "lon": 92.7265
+      }
+    ]
+  },
+  "regions": [
+    {
+      "key": "americas",
+      "label": "Americas",
+      "countries": [
+        "Canada",
+        "Mexico",
+        "United States of America",
+        "Argentina",
+        "Brazil",
+        "Peru"
+      ],
+      "cities": [
+        {
+          "slug": "toronto",
+          "name": "Toronto",
+          "lat": 43.6532,
+          "lon": -79.3832
+        },
+        {
+          "slug": "vancouver",
+          "name": "Vancouver",
+          "lat": 49.2827,
+          "lon": -123.1207
+        },
+        {
+          "slug": "cancun",
+          "name": "Cancún",
+          "lat": 21.1619,
+          "lon": -86.8515
+        },
+        {
+          "slug": "mexico-city",
+          "name": "Mexico City",
+          "lat": 19.4326,
+          "lon": -99.1332
+        },
+        {
+          "slug": "las-vegas",
+          "name": "Las Vegas",
+          "lat": 36.1699,
+          "lon": -115.1398
+        },
+        {
+          "slug": "los-angeles",
+          "name": "Los Angeles",
+          "lat": 34.0522,
+          "lon": -118.2437
+        },
+        {
+          "slug": "miami",
+          "name": "Miami",
+          "lat": 25.7617,
+          "lon": -80.1918
+        },
+        {
+          "slug": "new-york",
+          "name": "New York",
+          "lat": 40.7128,
+          "lon": -74.006
+        },
+        {
+          "slug": "san-francisco",
+          "name": "San Francisco",
+          "lat": 37.7749,
+          "lon": -122.4194
+        },
+        {
+          "slug": "buenos-aires",
+          "name": "Buenos Aires",
+          "lat": -34.6037,
+          "lon": -58.3816
+        },
+        {
+          "slug": "rio-de-janeiro",
+          "name": "Rio de Janeiro",
+          "lat": -22.9068,
+          "lon": -43.1729
+        },
+        {
+          "slug": "cusco",
+          "name": "Cusco & Machu Picchu",
+          "lat": -13.532,
+          "lon": -71.9675
+        },
+        {
+          "slug": "lima",
+          "name": "Lima",
+          "lat": -12.0464,
+          "lon": -77.0428
+        }
+      ]
+    },
+    {
+      "key": "europe",
+      "label": "Europe",
+      "countries": [
+        "France",
+        "United Kingdom",
+        "Netherlands",
+        "Ireland",
+        "Iceland",
+        "Denmark",
+        "Switzerland",
+        "Austria",
+        "Croatia",
+        "Greece",
+        "Italy",
+        "Portugal",
+        "Spain",
+        "Czechia",
+        "Germany",
+        "Hungary"
+      ],
+      "cities": [
+        {
+          "slug": "nice-riviera",
+          "name": "Nice & the Riviera",
+          "lat": 43.7102,
+          "lon": 7.262
+        },
+        {
+          "slug": "paris",
+          "name": "Paris",
+          "lat": 48.8566,
+          "lon": 2.3522
+        },
+        {
+          "slug": "london",
+          "name": "London",
+          "lat": 51.5074,
+          "lon": -0.1278
+        },
+        {
+          "slug": "edinburgh",
+          "name": "Edinburgh",
+          "lat": 55.9533,
+          "lon": -3.1883
+        },
+        {
+          "slug": "amsterdam",
+          "name": "Amsterdam",
+          "lat": 52.3676,
+          "lon": 4.9041
+        },
+        {
+          "slug": "dublin",
+          "name": "Dublin",
+          "lat": 53.3498,
+          "lon": -6.2603
+        },
+        {
+          "slug": "reykjavik",
+          "name": "Reykjavik",
+          "lat": 64.1466,
+          "lon": -21.9426
+        },
+        {
+          "slug": "copenhagen",
+          "name": "Copenhagen",
+          "lat": 55.6761,
+          "lon": 12.5683
+        },
+        {
+          "slug": "geneva",
+          "name": "Geneva",
+          "lat": 46.2044,
+          "lon": 6.1432
+        },
+        {
+          "slug": "st-moritz",
+          "name": "St. Moritz",
+          "lat": 46.4983,
+          "lon": 9.8377
+        },
+        {
+          "slug": "zermatt",
+          "name": "Zermatt",
+          "lat": 46.0207,
+          "lon": 7.7491
+        },
+        {
+          "slug": "zurich",
+          "name": "Zurich",
+          "lat": 47.3769,
+          "lon": 8.5417
+        },
+        {
+          "slug": "salzburg",
+          "name": "Salzburg",
+          "lat": 47.8095,
+          "lon": 13.055
+        },
+        {
+          "slug": "vienna",
+          "name": "Vienna",
+          "lat": 48.2082,
+          "lon": 16.3738
+        },
+        {
+          "slug": "dubrovnik",
+          "name": "Dubrovnik",
+          "lat": 42.6507,
+          "lon": 18.0944
+        },
+        {
+          "slug": "athens",
+          "name": "Athens",
+          "lat": 37.9838,
+          "lon": 23.7275
+        },
+        {
+          "slug": "mykonos",
+          "name": "Mykonos",
+          "lat": 37.4467,
+          "lon": 25.3289
+        },
+        {
+          "slug": "santorini",
+          "name": "Santorini",
+          "lat": 36.3932,
+          "lon": 25.4615
+        },
+        {
+          "slug": "florence",
+          "name": "Florence",
+          "lat": 43.7696,
+          "lon": 11.2558
+        },
+        {
+          "slug": "lake-como",
+          "name": "Lake Como",
+          "lat": 45.8081,
+          "lon": 9.0852
+        },
+        {
+          "slug": "milan",
+          "name": "Milan",
+          "lat": 45.4642,
+          "lon": 9.19
+        },
+        {
+          "slug": "rome",
+          "name": "Rome",
+          "lat": 41.9028,
+          "lon": 12.4964
+        },
+        {
+          "slug": "amalfi-coast",
+          "name": "The Amalfi Coast",
+          "lat": 40.634,
+          "lon": 14.6027
+        },
+        {
+          "slug": "venice",
+          "name": "Venice",
+          "lat": 45.4408,
+          "lon": 12.3155
+        },
+        {
+          "slug": "lisbon",
+          "name": "Lisbon",
+          "lat": 38.7223,
+          "lon": -9.1393
+        },
+        {
+          "slug": "porto",
+          "name": "Porto",
+          "lat": 41.1579,
+          "lon": -8.6291
+        },
+        {
+          "slug": "barcelona",
+          "name": "Barcelona",
+          "lat": 41.3874,
+          "lon": 2.1686
+        },
+        {
+          "slug": "madrid",
+          "name": "Madrid",
+          "lat": 40.4168,
+          "lon": -3.7038
+        },
+        {
+          "slug": "prague",
+          "name": "Prague",
+          "lat": 50.0755,
+          "lon": 14.4378
+        },
+        {
+          "slug": "munich",
+          "name": "Munich",
+          "lat": 48.1351,
+          "lon": 11.582
+        },
+        {
+          "slug": "budapest",
+          "name": "Budapest",
+          "lat": 47.4979,
+          "lon": 19.0402
+        }
+      ]
+    },
+    {
+      "key": "africa",
+      "label": "Africa",
+      "countries": [
+        "Egypt",
+        "Kenya",
+        "Morocco",
+        "South Africa",
+        "Tanzania",
+        "Mauritius",
+        "Seychelles"
+      ],
+      "cities": [
+        {
+          "slug": "cairo",
+          "name": "Cairo",
+          "lat": 30.0444,
+          "lon": 31.2357
+        },
+        {
+          "slug": "nairobi-mara",
+          "name": "Nairobi & the Mara",
+          "lat": -1.2921,
+          "lon": 36.8219
+        },
+        {
+          "slug": "marrakech",
+          "name": "Marrakech",
+          "lat": 31.6295,
+          "lon": -7.9811
+        },
+        {
+          "slug": "cape-town",
+          "name": "Cape Town",
+          "lat": -33.9249,
+          "lon": 18.4241
+        },
+        {
+          "slug": "zanzibar",
+          "name": "Zanzibar",
+          "lat": -6.1659,
+          "lon": 39.2026
+        },
+        {
+          "slug": "mauritius-city",
+          "name": "Mauritius",
+          "lat": -20.1609,
+          "lon": 57.5012
+        },
+        {
+          "slug": "mahe-seychelles",
+          "name": "Mahé",
+          "lat": -4.6191,
+          "lon": 55.4513
+        }
+      ]
+    },
+    {
+      "key": "middle-east",
+      "label": "Middle East",
+      "countries": [
+        "Jordan",
+        "Oman",
+        "Qatar",
+        "United Arab Emirates",
+        "Turkey"
+      ],
+      "cities": [
+        {
+          "slug": "amman-petra",
+          "name": "Amman & Petra",
+          "lat": 31.9539,
+          "lon": 35.9106
+        },
+        {
+          "slug": "muscat",
+          "name": "Muscat",
+          "lat": 23.588,
+          "lon": 58.3829
+        },
+        {
+          "slug": "doha",
+          "name": "Doha",
+          "lat": 25.2854,
+          "lon": 51.531
+        },
+        {
+          "slug": "abu-dhabi",
+          "name": "Abu Dhabi",
+          "lat": 24.4539,
+          "lon": 54.3773
+        },
+        {
+          "slug": "dubai",
+          "name": "Dubai",
+          "lat": 25.2048,
+          "lon": 55.2708
+        },
+        {
+          "slug": "cappadocia",
+          "name": "Cappadocia",
+          "lat": 38.6431,
+          "lon": 34.8286
+        },
+        {
+          "slug": "istanbul",
+          "name": "Istanbul",
+          "lat": 41.0082,
+          "lon": 28.9784
+        }
+      ]
+    },
+    {
+      "key": "india",
+      "label": "South Asia",
+      "countries": [
+        "India",
+        "Bhutan",
+        "Maldives",
+        "Nepal",
+        "Sri Lanka"
+      ],
+      "cities": [
+        {
+          "slug": "agra",
+          "name": "Agra",
+          "lat": 27.1767,
+          "lon": 78.0081
+        },
+        {
+          "slug": "alleppey",
+          "name": "Alleppey",
+          "lat": 9.4981,
+          "lon": 76.3388
+        },
+        {
+          "slug": "amritsar",
+          "name": "Amritsar",
+          "lat": 31.634,
+          "lon": 74.8723
+        },
+        {
+          "slug": "andaman",
+          "name": "Andaman Islands",
+          "lat": 11.6234,
+          "lon": 92.7265
+        },
+        {
+          "slug": "bengaluru",
+          "name": "Bengaluru",
+          "lat": 12.9716,
+          "lon": 77.5946
+        },
+        {
+          "slug": "chennai",
+          "name": "Chennai",
+          "lat": 13.0827,
+          "lon": 80.2707
+        },
+        {
+          "slug": "darjeeling",
+          "name": "Darjeeling",
+          "lat": 27.041,
+          "lon": 88.2663
+        },
+        {
+          "slug": "goa",
+          "name": "Goa",
+          "lat": 15.4909,
+          "lon": 73.8278
+        },
+        {
+          "slug": "hyderabad",
+          "name": "Hyderabad",
+          "lat": 17.385,
+          "lon": 78.4867
+        },
+        {
+          "slug": "jaipur",
+          "name": "Jaipur",
+          "lat": 26.9124,
+          "lon": 75.7873
+        },
+        {
+          "slug": "jaisalmer",
+          "name": "Jaisalmer",
+          "lat": 26.9157,
+          "lon": 70.9083
+        },
+        {
+          "slug": "jodhpur",
+          "name": "Jodhpur",
+          "lat": 26.2389,
+          "lon": 73.0243
+        },
+        {
+          "slug": "kochi",
+          "name": "Kochi",
+          "lat": 9.9312,
+          "lon": 76.2673
+        },
+        {
+          "slug": "kolkata",
+          "name": "Kolkata",
+          "lat": 22.5726,
+          "lon": 88.3639
+        },
+        {
+          "slug": "leh-ladakh",
+          "name": "Leh-Ladakh",
+          "lat": 34.1526,
+          "lon": 77.5771
+        },
+        {
+          "slug": "manali",
+          "name": "Manali",
+          "lat": 32.2432,
+          "lon": 77.1892
+        },
+        {
+          "slug": "mumbai",
+          "name": "Mumbai",
+          "lat": 19.076,
+          "lon": 72.8777
+        },
+        {
+          "slug": "munnar",
+          "name": "Munnar",
+          "lat": 10.0889,
+          "lon": 77.0595
+        },
+        {
+          "slug": "delhi",
+          "name": "New Delhi",
+          "lat": 28.6139,
+          "lon": 77.209
+        },
+        {
+          "slug": "ranthambore",
+          "name": "Ranthambore",
+          "lat": 26.0173,
+          "lon": 76.5026
+        },
+        {
+          "slug": "rishikesh",
+          "name": "Rishikesh",
+          "lat": 30.0869,
+          "lon": 78.2676
+        },
+        {
+          "slug": "shimla",
+          "name": "Shimla",
+          "lat": 31.1048,
+          "lon": 77.1734
+        },
+        {
+          "slug": "srinagar",
+          "name": "Srinagar",
+          "lat": 34.0837,
+          "lon": 74.7973
+        },
+        {
+          "slug": "udaipur",
+          "name": "Udaipur",
+          "lat": 24.5854,
+          "lon": 73.7125
+        },
+        {
+          "slug": "varanasi",
+          "name": "Varanasi",
+          "lat": 25.3176,
+          "lon": 82.9739
+        },
+        {
+          "slug": "paro",
+          "name": "Paro & Thimphu",
+          "lat": 27.4287,
+          "lon": 89.4164
+        },
+        {
+          "slug": "male-maldives",
+          "name": "Malé & the Atolls",
+          "lat": 4.1755,
+          "lon": 73.5093
+        },
+        {
+          "slug": "kathmandu",
+          "name": "Kathmandu",
+          "lat": 27.7172,
+          "lon": 85.324
+        },
+        {
+          "slug": "colombo",
+          "name": "Colombo",
+          "lat": 6.9271,
+          "lon": 79.8612
+        },
+        {
+          "slug": "galle",
+          "name": "Galle",
+          "lat": 6.0535,
+          "lon": 80.221
+        }
+      ]
+    },
+    {
+      "key": "east-asia",
+      "label": "East Asia",
+      "countries": [
+        "China",
+        "Hong Kong",
+        "Japan",
+        "South Korea",
+        "Taiwan"
+      ],
+      "cities": [
+        {
+          "slug": "shanghai",
+          "name": "Shanghai",
+          "lat": 31.2304,
+          "lon": 121.4737
+        },
+        {
+          "slug": "hong-kong",
+          "name": "Hong Kong",
+          "lat": 22.3193,
+          "lon": 114.1694
+        },
+        {
+          "slug": "kyoto",
+          "name": "Kyoto",
+          "lat": 35.0116,
+          "lon": 135.7681
+        },
+        {
+          "slug": "osaka",
+          "name": "Osaka",
+          "lat": 34.6937,
+          "lon": 135.5023
+        },
+        {
+          "slug": "tokyo",
+          "name": "Tokyo",
+          "lat": 35.6762,
+          "lon": 139.6503
+        },
+        {
+          "slug": "seoul",
+          "name": "Seoul",
+          "lat": 37.5665,
+          "lon": 126.978
+        },
+        {
+          "slug": "taipei",
+          "name": "Taipei",
+          "lat": 25.033,
+          "lon": 121.5654
+        }
+      ]
+    },
+    {
+      "key": "southeast-asia",
+      "label": "SE Asia",
+      "countries": [
+        "Cambodia",
+        "Indonesia",
+        "Malaysia",
+        "Singapore",
+        "Thailand",
+        "Vietnam"
+      ],
+      "cities": [
+        {
+          "slug": "siem-reap",
+          "name": "Siem Reap",
+          "lat": 13.3671,
+          "lon": 103.8448
+        },
+        {
+          "slug": "bali",
+          "name": "Bali",
+          "lat": -8.6705,
+          "lon": 115.2126
+        },
+        {
+          "slug": "kuala-lumpur",
+          "name": "Kuala Lumpur",
+          "lat": 3.139,
+          "lon": 101.6869
+        },
+        {
+          "slug": "langkawi",
+          "name": "Langkawi",
+          "lat": 6.35,
+          "lon": 99.8
+        },
+        {
+          "slug": "singapore-city",
+          "name": "Singapore",
+          "lat": 1.3521,
+          "lon": 103.8198
+        },
+        {
+          "slug": "bangkok",
+          "name": "Bangkok",
+          "lat": 13.7563,
+          "lon": 100.5018
+        },
+        {
+          "slug": "krabi",
+          "name": "Krabi",
+          "lat": 8.0863,
+          "lon": 98.9063
+        },
+        {
+          "slug": "phuket",
+          "name": "Phuket",
+          "lat": 7.8804,
+          "lon": 98.3923
+        },
+        {
+          "slug": "hanoi",
+          "name": "Hanoi",
+          "lat": 21.0278,
+          "lon": 105.8342
+        },
+        {
+          "slug": "ho-chi-minh-city",
+          "name": "Ho Chi Minh City",
+          "lat": 10.8231,
+          "lon": 106.6297
+        },
+        {
+          "slug": "hoi-an",
+          "name": "Hoi An & Da Nang",
+          "lat": 15.8801,
+          "lon": 108.338
+        }
+      ]
+    },
+    {
+      "key": "oceania",
+      "label": "Oceania",
+      "countries": [
+        "Australia",
+        "New Zealand"
+      ],
+      "cities": [
+        {
+          "slug": "melbourne",
+          "name": "Melbourne",
+          "lat": -37.8136,
+          "lon": 144.9631
+        },
+        {
+          "slug": "sydney",
+          "name": "Sydney",
+          "lat": -33.8688,
+          "lon": 151.2093
+        },
+        {
+          "slug": "auckland",
+          "name": "Auckland",
+          "lat": -36.8485,
+          "lon": 174.7633
+        },
+        {
+          "slug": "queenstown",
+          "name": "Queenstown",
+          "lat": -45.0312,
+          "lon": 168.6626
+        }
+      ]
+    }
+  ]
+}

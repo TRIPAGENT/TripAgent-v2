@@ -31,3 +31,10 @@ export function dossierRef(seed: string): string {
   for (const ch of seed) h = (h * 31 + ch.charCodeAt(0)) % 9000
   return `#TA-${1000 + h}`
 }
+
+/** How a member's tier reads on the card and in the app. The registry still
+ *  holds "Private Tier Black" for older members; the house now calls it Exclusive. */
+export function tierLabel(tier: string | null | undefined): string | undefined {
+  if (!tier) return undefined
+  return /^private tier black$/i.test(tier.trim()) ? 'Exclusive' : tier
+}

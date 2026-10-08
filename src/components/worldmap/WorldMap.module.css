@@ -1,0 +1,573 @@
+/* Region chips. "World" is pinned at the left; the regions scroll beside it. */
+.tabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 10px 16px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(4px);
+}
+:global(.wm-dark) .tabs {
+  /* medium dark grey, mostly see-through, with the map blurred behind it */
+  /* the blur itself is drawn inside the map's SVG (see the wm-row-blur filter) */
+  background: rgba(46, 46, 51, 0.16);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.tabScroll {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  overflow-x: auto;
+  padding-right: 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* a soft edge on the right, so the row reads as continuing */
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.tabScroll::-webkit-scrollbar {
+  display: none;
+}
+.tabs button {
+  flex: none;
+  white-space: nowrap;
+  height: 32px;
+  padding: 0 14px;
+  font-family: var(--fr);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s var(--ease, ease), background 0.2s var(--ease, ease), border-color 0.2s var(--ease, ease);
+}
+.tabs button[aria-selected="true"] {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.canvas {
+  position: relative;
+  /* Fills whatever height .mapArea's flex parent (StickyWorldMap's
+     .sticky) gives it — not a fixed/viewport-width-based height — so the
+     map always fits below the heading/stats block within one viewport. */
+  height: 100%;
+  overflow: hidden;
+}
+.map {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.zoomGroup {
+  transition: transform 0.8s var(--ease, ease);
+}
+.manualZoomGroup {
+  transition: transform 0.5s var(--ease, ease);
+}
+.wrapGhost {
+  opacity: 0.01;
+}
+.background {
+  fill: none;
+  stroke: var(--stone);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+.country {
+  fill: var(--paper, #fff);
+  stroke: var(--stone);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  opacity: 0.55;
+  /* Small delay on the fill specifically (not opacity) — a brief pause
+     before the hover tint starts reads as a deliberate, smoother reveal
+     rather than an instant snap; applies both on hover-in and hover-out. */
+  transition: opacity 0.5s var(--ease, ease), fill 0.3s var(--ease, ease) 0.08s;
+}
+.regionGroup {
+  cursor: pointer;
+}
+/* !important: each shape plays a one-shot entrance animation on mount
+   (regionShapePopIn, see .revealed .regionReveal .country below) with
+   animation-fill-mode: both — that keeps the animation's own end-state
+   fill in control of the property indefinitely, even long after it
+   finishes running, which silently outranks a plain (non-animated) rule
+   for that same property regardless of selector specificity. Without
+   !important here, hovering would visibly retint .regionLabel (not
+   animated) but never the shape itself. */
+.regionGroup:hover .country:not(.active),
+.regionGroup.regionHovered .country:not(.active) {
+  fill: #f4ebda !important;
+}
+:global(.wm-dark) .regionGroup:hover .country,
+:global(.wm-dark) .regionGroup.regionHovered .country {
+  fill: #1e1a14 !important;
+}
+.regionLabel {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: #b7a488;
+  pointer-events: auto;
+  /* Same small delay as .country's own fill transition, so the shape and
+     its name tint together rather than one lagging the other. */
+  transition: fill 0.3s var(--ease, ease) 0.08s;
+}
+.regionGroup:hover .regionLabel,
+.regionGroup.regionHovered .regionLabel {
+  fill: var(--ink-soft);
+}
+.dimmed {
+  opacity: 1;
+  transition: opacity 0.5s var(--ease, ease);
+}
+.active {
+  stroke: var(--signature, var(--ink));
+  stroke-width: 0.9;
+  opacity: 1;
+  transition: opacity 0.5s var(--ease, ease), stroke 0.5s var(--ease, ease);
+}
+.breadcrumb {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fr);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+.breadcrumb button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: color 0.3s var(--ease, ease), text-decoration-color 0.3s var(--ease, ease);
+}
+.breadcrumb button:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+.breadcrumbCurrent {
+  color: var(--ink);
+  font-weight: 600;
+}
+.mapArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+/* Floating hover card — sits directly above a city dot/anchor (positioned
+   by its parent <foreignObject>'s x/y, in the same locally-scaled
+   coordinate space as the dot itself, so it renders at a constant apparent
+   size regardless of zoom). Always mounted; visibility is a pure opacity
+   transition (both in AND out — unlike the old .cityPreview square this
+   replaces, which snapped to hidden instantly) so it never needs a tail or
+   pointer to read as "belonging" to the dot it's over.
+
+   Image-background layout (the only one kept). */
+.hoverCard {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  background: var(--paper, #fff);
+  border: 1px solid var(--line, #e7e6e2);
+  /* !important: site.css has a global `*{box-shadow:none!important}` reset
+     (its own deliberate "flat, no shadows" design language, with a short
+     explicit exception list for floating overlays) — this floating card is
+     the same kind of exception, just declared here instead of there. */
+  box-shadow: var(--shadow-lg, 0 24px 56px rgba(22, 20, 16, 0.12)) !important;
+  padding: 9px;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease, ease);
+}
+.hoverCardVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Image-background (4:3) — the photo itself is the card, white text
+   overlaid directly on it: "Feature" top-left, city + country bottom-left.
+   No boxed-off image area and no separate body/desc/CTA — just the two
+   overlaid labels. Subtle elevation (var(--shadow), the site's own
+   "regular" token) rather than the heavier --shadow-lg the other two
+   variants use underneath (see .hoverCard), since the photo background
+   already gives it plenty of visual weight. */
+.hoverCardImg {
+  position: relative;
+  padding: 0;
+  border: none;
+  /* No overflow:hidden here — harmless either way for the box-shadow site.css
+     fights over (see the !important note on .hoverCard above), but corner-
+     rounding lives on the two full-bleed layers below (the image and the
+     scrim) regardless, each with their own border-radius. */
+  box-shadow: var(--shadow, 0 12px 34px rgba(22, 20, 16, 0.08)) !important;
+  border-radius: 4px;
+}
+.hoverCardImgBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.hoverCardImgScrim {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  /* Dark at both the top (for "Feature") and bottom (for city/country),
+     lighter through the middle — legible over any photo regardless of its
+     own tonal range, without flattening the whole image to one dark tint. */
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0) 32%,
+    rgba(0, 0, 0, 0) 55%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+}
+.hoverCardImgFeature {
+  position: absolute;
+  top: 9px;
+  left: 10px;
+  font-family: var(--fr);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: var(--shadow-dark, 0 2px 28px rgba(0, 0, 0, 0.4));
+}
+.hoverCardImgLocation {
+  position: absolute;
+  bottom: 9px;
+  left: 10px;
+  right: 10px;
+  color: #fff;
+}
+.hoverCardImgCity {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 19px;
+  line-height: 1.2;
+  text-shadow: var(--shadow-dark, 0 2px 28px rgba(0, 0, 0, 0.4));
+}
+.hoverCardImgCountry {
+  font-family: var(--fr);
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: var(--shadow-dark, 0 2px 28px rgba(0, 0, 0, 0.4));
+}
+@keyframes markerPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes ringPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+@keyframes regionPopIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.regionReveal {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  opacity: 0;
+}
+.revealed .regionReveal {
+  animation: regionPopIn 2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+@keyframes regionShapePopIn {
+  0% {
+    fill: var(--paper, #fff);
+    fill-opacity: 0;
+    stroke: var(--signature, #7a1f2b);
+    stroke-width: 0.6;
+    opacity: 0;
+  }
+  55% {
+    fill: #f4ebda;
+    fill-opacity: 1;
+    stroke: var(--signature, #7a1f2b);
+    stroke-width: 1;
+    opacity: 1;
+  }
+  100% {
+    fill: var(--paper, #fff);
+    fill-opacity: 1;
+    stroke: var(--stone);
+    stroke-width: 0.6;
+    opacity: 0.55;
+  }
+}
+.revealed .regionReveal .country {
+  animation: regionShapePopIn 2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+.markerReveal {
+  opacity: 0;
+  transform: scale(0.75);
+}
+.revealed .markerReveal {
+  animation: markerPopIn 2s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+.worldMarkersReveal {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  transform: scale(0.96);
+}
+.revealed .worldMarkersReveal {
+  animation: markerPopIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+.cityMarker {
+  cursor: pointer;
+}
+.cityDot {
+  fill: #d4af37;
+  stroke: var(--paper, #fff);
+  stroke-width: 1.5;
+  transition: fill 0.25s var(--ease, ease), filter 0.25s var(--ease, ease), opacity 0.15s var(--ease, ease);
+}
+.cityDotHidden {
+  opacity: 0;
+}
+/* Swapped in on hover in place of the plain dot (see .cityDotHidden above)
+   — same .anchorRing/.anchorImage styling World view's own markers use, so
+   both views read as one marker language, just reserved for the hover
+   moment here rather than being the resting state. */
+.cityAnchorMarker {
+  opacity: 0;
+  transition: opacity 0.15s var(--ease, ease);
+}
+.cityAnchorMarkerVisible {
+  opacity: 1;
+}
+.cityLabel {
+  font-family: var(--fr, sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--paper, #fff);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.cityPreview {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s linear 0s;
+}
+.cityPreviewBg {
+  fill: var(--paper-2, #f4f2ee);
+  stroke: var(--line, #e3e2dd);
+  stroke-width: 1;
+}
+.worldAnchor {
+  cursor: pointer;
+}
+.anchorScale {
+  transition: transform 0.25s var(--ease, ease);
+  transform-origin: 0 0;
+}
+.worldAnchor:hover .anchorScale,
+.worldAnchor:focus-visible .anchorScale {
+  transform: scale(1.2);
+}
+/* A city's photo anchor in a region view: no gold halo, just a clean white
+   outline on the circle itself. */
+.cityOutline {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.6;
+}
+.anchorRing {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.2;
+  opacity: 0.4;
+  transition: opacity 0.25s var(--ease, ease);
+}
+.revealed .anchorRing {
+  animation: ringPopIn 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: var(--pop-delay, 0s);
+}
+.worldAnchor:hover .anchorRing,
+.worldAnchor:focus-visible .anchorRing {
+  opacity: 0.9;
+}
+.anchorImage {
+  opacity: 0.92;
+  transition: opacity 0.25s var(--ease, ease);
+}
+.worldAnchor:hover .anchorImage,
+.worldAnchor:focus-visible .anchorImage {
+  opacity: 1;
+}
+.anchorLabel {
+  font-family: var(--fr);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  fill: var(--ink);
+  opacity: 0;
+  transform: translateY(2px);
+  paint-order: stroke;
+  stroke: var(--paper, #fff);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  transition: opacity 0.25s var(--ease, ease), transform 0.25s var(--ease, ease);
+  pointer-events: none;
+}
+.worldAnchor:hover .anchorLabel,
+.worldAnchor:focus-visible .anchorLabel {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .markerReveal,
+  .regionReveal,
+  .worldMarkersReveal,
+  .revealed .markerReveal,
+  .revealed .regionReveal,
+  .revealed .worldMarkersReveal,
+  .revealed .anchorRing {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Zoom controls: a small horizontal glass pill in the bottom-left corner, with a
+   hairline between the two buttons. */
+.zoomControls {
+  position: absolute;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(40, 40, 45, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.zoomControls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s var(--ease, ease), opacity 0.2s var(--ease, ease);
+}
+.zoomControls button:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+.zoomControls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.zoomDivider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* World view: a region's name as a glass pill (the old map's way), at a fixed size. */
+.regionPill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--fr);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 14px;
+  color: #f2ede4;
+  background: rgba(16, 16, 18, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  cursor: pointer;
+  animation: pillIn 0.6s var(--ease, ease) 0.5s both;
+}
+@keyframes pillIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

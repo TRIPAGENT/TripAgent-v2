@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Btn, Icon, Photo, Sig } from '@/components/ui'
+import { BackButton, Btn, Icon, Photo, Sig } from '@/components/ui'
 import { brandImage } from '@/lib/catalogue'
 import { PARTY_FOR, useStore, type Preferences } from '@/context/store'
 
@@ -234,15 +234,12 @@ export default function Onboarding() {
       >
         {/* Top bar: back, where we are, and the way out */}
         <div className="relative flex h-11 items-center justify-between">
-          <button
-            type="button"
-            aria-label="Back to the previous question"
-            className="k-icon-btn k-icon-btn-solid disabled:opacity-30"
+          <BackButton
+            solid
+            label="Back to the previous question"
             disabled={index === 0}
             onClick={() => setIndex(index - 1)}
-          >
-            <Icon name="back" size={20} />
-          </button>
+          />
           <p className="t-label c-ivory-2 pointer-events-none absolute inset-x-0 text-center">
             {q.eyebrow}
           </p>

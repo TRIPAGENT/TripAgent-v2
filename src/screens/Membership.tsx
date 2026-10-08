@@ -6,6 +6,7 @@ import { Btn, Icon, Mark, Status } from '@/components/ui'
 import { useStore, type Preferences } from '@/context/store'
 import { DESK } from '@/data/members'
 import { isLive, STATUS_LABEL } from '@/lib/desk'
+import { tierLabel } from '@/lib/format'
 
 /* --------------------------------------------------------------- the file -- */
 
@@ -202,7 +203,7 @@ export default function Membership() {
             </span>
 
             <div className="flex flex-col gap-1.5">
-              <span className="t-label c-champagne">{member?.tier ?? 'Member'}</span>
+              <span className="t-label c-champagne">{tierLabel(member?.tier) ?? 'Member'}</span>
               <span
                 className="k-engrave truncate"
                 style={{ fontFamily: 'var(--f-display)', fontSize: 22, lineHeight: '28px', letterSpacing: '0.01em' }}

@@ -10,6 +10,7 @@ import type { TripPlan } from '@/lib/plan'
 import { cityHero } from '@/lib/catalogue'
 import type { BookingComponent } from '@/lib/types'
 import { humanizePlan, splitName } from '@/lib/humanize'
+import { tierLabel } from '@/lib/format'
 
 /**
  * Asking a person to price the trip. What goes to the Desk is exactly what the
@@ -270,7 +271,7 @@ export default function BookingRequest() {
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <p className="t-title-s truncate">{member?.name ?? 'Guest'}</p>
               <p className="t-caption t-figure truncate">
-                {member?.tier ?? 'Invited Guest'}
+                {tierLabel(member?.tier) ?? 'Invited Guest'}
                 {member?.phoneMasked ? ` · ${member.phoneMasked}` : ''}
               </p>
             </div>
