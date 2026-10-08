@@ -68,7 +68,7 @@ export default function SignIn() {
     signIn(resolved)
     const from = (location.state as { from?: unknown } | null)?.from
     const destination = typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !['/signin', '/onboarding'].includes(from) ? from : null
-    navigate(destination ?? (prefs.completed ? '/' : '/onboarding'), { replace: true })
+    navigate(destination ?? (prefs.profile ? '/' : '/onboarding'), { replace: true })
   }
 
   /* ------------------------------------------------------------- the door -- */

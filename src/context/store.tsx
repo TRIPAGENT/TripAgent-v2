@@ -1,3 +1,4 @@
+import type { TravelProfile } from '@/onboarding/types'
 import {
   createContext,
   useCallback,
@@ -40,6 +41,8 @@ export interface Preferences {
   lodging?: 'sanctuary' | 'grand' | 'ultra' | 'private'
   /** Default party size, derived from `company` and overridable per request. */
   party?: number
+  /** The three-step travel profile: passions, houses and places. */
+  profile?: TravelProfile
   completed: boolean
 }
 
